@@ -11,6 +11,12 @@ updates:
     ignore:
       - dependency-name: '*'
         update-types: ['version-update:semver-major']
+      # The wildcard rule did not stop the Django 6 range bump (#5), so Django gets an
+      # explicit rule: stay on the 5.2 LTS line until a planned upgrade.
+      - dependency-name: 'django'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'django'
+        versions: ['>=6.0']
     groups:
       pip-minor-patch:
         update-types: ['minor', 'patch']
