@@ -151,8 +151,14 @@ class Command(BaseCommand):
                     now=slot.starts_at - timedelta(days=1),
                 )
 
-    def _tickets(self, branch, services, count):
-        start = timezone.now() - timedelta(minutes=count * 4)
+    def _tickets(self, branch, services, count, now=None):
+        # Tickets every 4 minutes up to now, squeezed after local midnight when it is
+        # early in the day: they must all belong to today, or the "already seeded
+        # today?" check above would not see them and a re-run would add them again.
+        now = now or timezone.now()
+        midnight = timezone.localtime(now).replace(hour=0, minute=0, second=0, microsecond=0)
+        step = min(timedelta(minutes=4), (now - midnight) / max(count, 1))
+        start = now - step * count
         for i in range(count):
             service = services[i % len(services)]
             engine.issue_ticket(
@@ -160,7 +166,7 @@ class Command(BaseCommand):
                 nickname=NICKNAMES[i % len(NICKNAMES)],
                 priority=(i % 7 == 3),
                 source=Ticket.Source.DESK if i % 3 == 0 else Ticket.Source.SELF,
-                now=start + timedelta(minutes=i * 4),
+                now=start + step * i,
             )
         # Serve the first few so the board and history have something to show.
         for counter in branch.counters.filter(is_active=True)[:2]:

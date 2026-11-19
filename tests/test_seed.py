@@ -68,3 +68,19 @@ def test_seed_bookings_are_synthetic_and_consistent():
     for slot in Slot.objects.all():
         held = slot.bookings.exclude(status="cancelled").count()
         assert slot.booked_count == held <= slot.capacity
+
+
+def test_seed_just_after_midnight_stays_idempotent(monkeypatch):
+    # 00:02 MYT: 12 tickets 4 minutes apart would start the previous evening; they
+    # must all land on today, or a second run would not see them and add 12 more.
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+
+    fixed = datetime(2026, 11, 20, 0, 2, tzinfo=ZoneInfo("Asia/Kuala_Lumpur"))
+    monkeypatch.setattr("django.utils.timezone.now", lambda: fixed)
+    call_command("seed_demo", password="seed-pass-123", verbosity=0)
+    call_command("seed_demo", password="seed-pass-123", verbosity=0)
+    assert Ticket.objects.count() == 24
+    assert set(Ticket.objects.values_list("day", flat=True)) == {fixed.date()}
+    assert max(Ticket.objects.values_list("created_at", flat=True)) <= fixed
+    assert min(Ticket.objects.values_list("created_at", flat=True)) >= fixed - timedelta(minutes=2)
