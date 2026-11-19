@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .engine import normalize_phone
 from .models import Counter, Service, Slot, Ticket, phone_validator
+from .reports import MAX_RANGE_DAYS
 
 
 class JoinForm(forms.Form):
@@ -244,3 +245,40 @@ class AppointmentFilterForm(forms.Form):
     q = forms.CharField(
         label=_("Reference, nickname or last 4 digits"), required=False, max_length=40
     )
+
+
+# --- Reports --------------------------------------------------------------------------------
+
+
+class ReportFilterForm(forms.Form):
+    """Date range (local days, inclusive) and optional service for the manager report."""
+
+    start = forms.DateField(label=_("From"), widget=forms.DateInput(attrs={"type": "date"}))
+    end = forms.DateField(label=_("To"), widget=forms.DateInput(attrs={"type": "date"}))
+    service = forms.ModelChoiceField(
+        label=_("Service"),
+        required=False,
+        queryset=Service.objects.none(),
+        empty_label=_("All services"),
+    )
+
+    DEFAULT_DAYS = 7
+
+    def __init__(self, *args, branch, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["service"].queryset = branch.services.order_by("prefix")
+        today = timezone.localdate()
+        self.fields["end"].initial = today
+        self.fields["start"].initial = today - timedelta(days=self.DEFAULT_DAYS - 1)
+
+    def clean(self):
+        data = super().clean()
+        start, end = data.get("start"), data.get("end")
+        if start and end:
+            if start > end:
+                raise forms.ValidationError(_("The start date must be on or before the end date."))
+            if (end - start).days + 1 > MAX_RANGE_DAYS:
+                raise forms.ValidationError(
+                    _("Choose at most %(days)d days.") % {"days": MAX_RANGE_DAYS}
+                )
+        return data

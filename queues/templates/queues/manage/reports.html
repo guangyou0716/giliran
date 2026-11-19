@@ -1,0 +1,84 @@
+{% extends "base.html" %}{% load i18n report_tags %}
+{% block title %}{% translate "Reports" %}{% endblock %}
+{% block content %}
+<p class="eyebrow"><a href="{% url 'staff:dashboard' %}">{{ branch.name }}</a></p>
+<div class="card-head">
+  <h1>{% translate "Reports" %}</h1>
+  <a class="btn" href="{% url 'manage:settings' branch.slug %}">{% translate "Services & counters" %}</a>
+</div>
+<form method="get" class="filters" aria-label="{% translate 'Report filters' %}">
+  <div><label for="{{ form.start.id_for_label }}">{{ form.start.label }}</label>{{ form.start }}</div>
+  <div><label for="{{ form.end.id_for_label }}">{{ form.end.label }}</label>{{ form.end }}</div>
+  <div><label for="{{ form.service.id_for_label }}">{{ form.service.label }}</label>{{ form.service }}</div>
+  <div class="filter-actions"><button type="submit" class="btn btn-primary">{% translate "Show" %}</button>
+    {% if report %}<a class="btn" href="?{{ csv_query }}" download>{% translate "Download CSV" %}</a>{% endif %}</div>
+</form>
+{% if form.errors %}
+<div class="msg msg-error" role="alert">
+  {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+  {% for f in form %}{% for error in f.errors %}<p>{{ f.label }}: {{ error }}</p>{% endfor %}{% endfor %}
+</div>
+{% endif %}
+{% if report %}
+{% with t=report.total %}
+<p class="muted">{% blocktranslate with start=report.start|date:"Y-m-d" end=report.end|date:"Y-m-d" %}{{ start }} to {{ end }} (Malaysia time){% endblocktranslate %}</p>
+<dl class="report-stats">
+  <div><dt>{% translate "Tickets" %}</dt><dd>{{ t.tickets }}</dd></div>
+  <div><dt>{% translate "Served" %}</dt><dd>{{ t.served }}</dd></div>
+  <div><dt>{% translate "Avg. wait (min)" %}</dt><dd>{{ t.avg_wait_min|num1 }}</dd></div>
+  <div><dt>{% translate "Median wait (min)" %}</dt><dd>{{ t.median_wait_min|num1 }}</dd></div>
+  <div><dt>{% translate "Avg. service (min)" %}</dt><dd>{{ t.avg_service_min|num1 }}</dd></div>
+  <div><dt>{% translate "No-show rate (%)" %}</dt><dd>{{ t.no_show_rate|num1 }}</dd></div>
+</dl>
+{% endwith %}
+<section class="card">
+  <h2 id="by-service">{% translate "By service" %}</h2>
+  <div class="table-wrap"><table class="table numeric" aria-labelledby="by-service">
+    <thead><tr>
+      <th scope="col">{% translate "Service" %}</th><th scope="col">{% translate "Tickets" %}</th><th scope="col">{% translate "Served" %}</th>
+      <th scope="col">{% translate "Avg. wait (min)" %}</th><th scope="col">{% translate "Median wait (min)" %}</th><th scope="col">{% translate "Avg. service (min)" %}</th>
+      <th scope="col">{% translate "No-shows" %}</th><th scope="col">{% translate "No-show rate (%)" %}</th><th scope="col">{% translate "Left queue" %}</th><th scope="col">{% translate "Bookings cancelled" %}</th>
+    </tr></thead>
+    <tbody>
+    {% for service, s in report.services %}
+      <tr{% if s.is_empty %} class="inactive"{% endif %}>
+        <th scope="row"><strong>{{ service.prefix }}</strong> {{ service.name }}</th><td>{{ s.tickets }}</td><td>{{ s.served }}</td>
+        <td>{{ s.avg_wait_min|num1 }}</td><td>{{ s.median_wait_min|num1 }}</td><td>{{ s.avg_service_min|num1 }}</td>
+        <td>{{ s.no_shows }}</td><td>{{ s.no_show_rate|num1 }}</td><td>{{ s.left_queue }}</td><td>{{ s.bookings_cancelled }}</td>
+      </tr>
+    {% empty %}<tr><td colspan="10" class="empty">{% translate "No services yet." %}</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+<section class="card">
+  <h2 id="by-hour">{% translate "By hour of day" %}</h2>
+  {% if report.hours %}
+  <div class="table-wrap"><table class="table numeric" aria-labelledby="by-hour">
+    <thead><tr>
+      <th scope="col">{% translate "Hour" %}</th><th scope="col">{% translate "Tickets" %}</th><th scope="col">{% translate "Served" %}</th>
+      <th scope="col">{% translate "Avg. wait (min)" %}</th><th scope="col">{% translate "Median wait (min)" %}</th><th scope="col">{% translate "No-shows" %}</th>
+    </tr></thead>
+    <tbody>
+    {% for hour, s, width in report.hour_rows %}
+      <tr>
+        <th scope="row">{{ hour|stringformat:"02d" }}:00</th>
+        <td class="bar-cell"><span class="bar" aria-hidden="true"><span style="width: {{ width }}%"></span></span>{{ s.tickets }}</td>
+        <td>{{ s.served }}</td><td>{{ s.avg_wait_min|num1 }}</td><td>{{ s.median_wait_min|num1 }}</td><td>{{ s.no_shows }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<p class="empty">{% translate "No tickets in this period." %}</p>{% endif %}
+</section>
+<details class="card small">
+  <summary>{% translate "How these numbers are counted" %}</summary>
+  <ul>
+    <li>{% translate "Wait: from taking the ticket (or checking in for an appointment) to the first call." %}</li>
+    <li>{% translate "Service time: from Start serving to Done." %}</li>
+    <li>{% translate "No-shows: tickets marked no-show plus appointments nobody checked in for. Rate = no-shows / (tickets + missed appointments)." %}</li>
+    <li>{% translate "Left queue: customers who cancelled their ticket. Bookings cancelled: appointments cancelled in advance." %}</li>
+    <li>{% translate "Days and hours are Malaysia time; tickets count in the hour they were taken, appointments in their slot hour." %}</li>
+  </ul>
+</details>
+{% endif %}
+{% endblock %}

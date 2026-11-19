@@ -25,7 +25,8 @@
     <a class="btn" href="{% url 'staff:history' row.branch.slug %}">{% translate "Ticket history" %}</a>
     <a class="btn" href="{% url 'board' row.branch.slug %}">{% translate "Display board" %}</a>
     <a class="btn" href="{% url 'join' row.branch.slug %}">{% translate "Join page" %}</a>
-    {% if row.role == MANAGER %}<a class="btn" href="{% url 'manage:settings' row.branch.slug %}">{% translate "Services & counters" %}</a>{% endif %}
+    {% if row.role == MANAGER %}<a class="btn" href="{% url 'manage:settings' row.branch.slug %}">{% translate "Services & counters" %}</a>
+    <a class="btn" href="{% url 'manage:reports' row.branch.slug %}">{% translate "Reports" %}</a>{% endif %}
   </p>
 </section>
 {% empty %}

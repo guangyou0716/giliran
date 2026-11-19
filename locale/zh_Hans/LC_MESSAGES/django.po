@@ -734,3 +734,85 @@ msgstr "暂无预约的时段"
 #. Django date format for a short day label, e.g. "Fri 20 Nov".
 msgid "D j M"
 msgstr "n月j日 D"
+
+# Reports (increment 3)
+
+#, python-format
+msgid "%(start)s to %(end)s (Malaysia time)"
+msgstr "%(start)s 至 %(end)s（马来西亚时间）"
+
+msgid "Avg. service (min)"
+msgstr "平均服务（分钟）"
+
+msgid "Avg. wait (min)"
+msgstr "平均等候（分钟）"
+
+msgid "Bookings cancelled"
+msgstr "已取消预约"
+
+msgid "By hour of day"
+msgstr "按时段（小时）"
+
+msgid "By service"
+msgstr "按服务"
+
+#, python-format
+msgid "Choose at most %(days)d days."
+msgstr "最多选择 %(days)d 天。"
+
+msgid "Days and hours are Malaysia time; tickets count in the hour they were taken, appointments in their slot hour."
+msgstr "日期和小时均为马来西亚时间；号码按取号的小时统计，预约按其时段的小时统计。"
+
+msgid "Download CSV"
+msgstr "下载 CSV"
+
+msgid "Hour"
+msgstr "小时"
+
+msgid "How these numbers are counted"
+msgstr "这些数字如何计算"
+
+msgid "Left queue"
+msgstr "离开队列"
+
+msgid "Left queue: customers who cancelled their ticket. Bookings cancelled: appointments cancelled in advance."
+msgstr "离开队列：取消了号码的顾客。已取消预约：提前取消的预约。"
+
+msgid "Median wait (min)"
+msgstr "等候中位数（分钟）"
+
+msgid "No tickets in this period."
+msgstr "此期间没有号码。"
+
+msgid "No-show rate (%)"
+msgstr "过号率（%）"
+
+msgid "No-shows"
+msgstr "过号"
+
+msgid "No-shows: tickets marked no-show plus appointments nobody checked in for. Rate = no-shows / (tickets + missed appointments)."
+msgstr "过号：标记为过号的号码，加上无人签到的预约。过号率 = 过号 / （号码 + 错过的预约）。"
+
+msgid "Report filters"
+msgstr "报表筛选"
+
+msgid "Reports"
+msgstr "报表"
+
+msgid "Served"
+msgstr "已服务"
+
+msgid "Service time: from Start serving to Done."
+msgstr "服务时间：从“开始服务”到“完成”。"
+
+msgid "The start date must be on or before the end date."
+msgstr "开始日期必须早于或等于结束日期。"
+
+msgid "Tickets"
+msgstr "号码"
+
+msgid "To"
+msgstr "至"
+
+msgid "Wait: from taking the ticket (or checking in for an appointment) to the first call."
+msgstr "等候：从取号（或预约签到）到第一次叫号。"
