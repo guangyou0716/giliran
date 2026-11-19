@@ -24,14 +24,14 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(Counter)
 class CounterAdmin(admin.ModelAdmin):
-    list_display = ["name", "branch", "is_active"]
+    list_display = ["name", "branch", "is_active", "is_paused"]
     list_filter = ["branch"]
 
 
 class TicketEventInline(admin.TabularInline):
     model = TicketEvent
     extra = 0
-    readonly_fields = ["action", "from_status", "to_status", "counter", "actor", "at"]
+    readonly_fields = ["action", "from_status", "to_status", "counter", "actor", "note", "at"]
 
 
 @admin.register(Ticket)

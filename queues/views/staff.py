@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 
 from .. import engine
 from ..forms import TicketFilterForm, WalkInForm
-from ..models import Branch, Counter, Ticket
+from ..models import Branch, Counter, Service, Ticket
 from ..permissions import MANAGER, branches_for, require_staff, role_at
 
 
@@ -46,6 +46,7 @@ def counter_console(request, pk):
             "current": current,
             "waiting": waiting,
             "walkin_form": WalkInForm(branch=counter.branch),
+            "transfer_services": counter.branch.services.filter(is_active=True),
         },
     )
 
@@ -63,6 +64,12 @@ def counter_action(request, pk):
                 messages.info(request, _("Nobody is waiting."))
             else:
                 messages.success(request, _("Called %(code)s.") % {"code": ticket.code})
+        elif action in ("pause", "resume"):
+            engine.set_paused(counter, action == "pause")
+            messages.success(
+                request,
+                _("Counter paused.") if action == "pause" else _("Counter resumed."),
+            )
         elif action in engine.STAFF_ACTIONS:
             current = engine.active_ticket(counter)
             if current is None:
@@ -97,12 +104,46 @@ def walk_in(request, slug):
             messages.success(request, _("Ticket %(code)s added.") % {"code": ticket.code})
     else:
         messages.error(request, _("Choose a service for the walk-in."))
+    return _back(request)
+
+
+def _back(request):
+    """Redirect to the posted ``next`` path when it is a staff page of this site."""
     back = request.POST.get("next", "")
     if back.startswith("/staff/") and url_has_allowed_host_and_scheme(
         back, allowed_hosts={request.get_host()}, require_https=request.is_secure()
     ):
         return redirect(back)
     return redirect("staff:dashboard")
+
+
+@login_required
+@require_POST
+def ticket_transfer(request, pk):
+    """Staff: move a ticket of this branch to another service (audited, keeps its place)."""
+    ticket = get_object_or_404(Ticket.objects.select_related("branch"), pk=pk)
+    require_staff(request.user, ticket.branch)
+    raw = request.POST.get("service", "")
+    target = (
+        Service.objects.filter(pk=int(raw), branch_id=ticket.branch_id).first()
+        if raw.isascii() and raw.isdigit()
+        else None
+    )
+    if target is None:
+        messages.error(request, _("Choose a service of this branch."))
+        return _back(request)
+    try:
+        old_code = ticket.code
+        moved = engine.transfer_ticket(ticket, target, actor=request.user)
+    except engine.QueueError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(
+            request,
+            _("Ticket %(old)s moved to %(service)s as %(new)s.")
+            % {"old": old_code, "service": target.name, "new": moved.code},
+        )
+    return _back(request)
 
 
 @login_required

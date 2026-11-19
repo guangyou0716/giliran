@@ -33,6 +33,10 @@ ALLOWED_HOSTS = [
     for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1]").split(",")
     if h.strip()
 ]
+if "*" not in ALLOWED_HOSTS and "127.0.0.1" not in ALLOWED_HOSTS:
+    # The container healthcheck calls http://127.0.0.1:8000/healthz/ from inside the container;
+    # without this, DJANGO_ALLOWED_HOSTS=queue.example.com would make it fail with HTTP 400.
+    ALLOWED_HOSTS.append("127.0.0.1")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -54,6 +58,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if not DEBUG:
+    # Serve the collected static files (python manage.py collectstatic) straight from the app
+    # process, so the Docker image needs no separate web server. With DEBUG on, Django's
+    # staticfiles app serves them.
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 ROOT_URLCONF = "config.urls"
 
@@ -112,8 +122,16 @@ LOGOUT_REDIRECT_URL = "home"
 
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = "Lax"
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+# Secure cookies need HTTPS. They default to on when DEBUG is off; set DJANGO_SECURE_COOKIES=0
+# only to try the Docker Compose stack over plain http://localhost (never in production).
+SECURE_COOKIES = env_bool("DJANGO_SECURE_COOKIES", not DEBUG)
+SESSION_COOKIE_SECURE = SECURE_COOKIES
+CSRF_COOKIE_SECURE = SECURE_COOKIES
+# Origins allowed to post forms when the site is served from another origin/port or HTTPS proxy,
+# e.g. https://queue.example.com (comma separated).
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
+]
 X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
@@ -141,3 +159,16 @@ GILIRAN_BOOKING_GRACE_MIN = int(os.environ.get("GILIRAN_BOOKING_GRACE_MIN", "10"
 GILIRAN_CHECKIN_EARLY_MIN = int(os.environ.get("GILIRAN_CHECKIN_EARLY_MIN", "30"))
 # How many days ahead (including today) the booking page offers.
 GILIRAN_BOOKING_DAYS = int(os.environ.get("GILIRAN_BOOKING_DAYS", "7"))
+
+# Rate limits on the public endpoints that create data (join a queue, book an appointment):
+# at most GILIRAN_RATE_LIMIT_MAX POSTs per client IP per GILIRAN_RATE_LIMIT_WINDOW seconds,
+# counted in the Django cache (see queues/ratelimit.py). 0 disables the limit.
+GILIRAN_RATE_LIMIT_MAX = int(os.environ.get("GILIRAN_RATE_LIMIT_MAX", "10"))
+GILIRAN_RATE_LIMIT_WINDOW = int(os.environ.get("GILIRAN_RATE_LIMIT_WINDOW", "60"))
+# Set to 1 only behind a reverse proxy you control that overwrites X-Forwarded-For: the
+# client IP is then the last address in that header instead of REMOTE_ADDR.
+GILIRAN_TRUST_PROXY = os.environ.get("GILIRAN_TRUST_PROXY", "0") in ("1", "true", "True")
+
+# Booking phone numbers older than this many days are blanked by
+# `python manage.py purge_phones` (run it daily from cron).
+GILIRAN_PHONE_RETENTION_DAYS = int(os.environ.get("GILIRAN_PHONE_RETENTION_DAYS", "30"))

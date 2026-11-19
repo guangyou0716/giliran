@@ -830,3 +830,69 @@ msgstr "Giliran anda hampir tiba! Sila tunggu berhampiran kaunter."
 
 msgid "Play a sound and notify me when it is almost my turn"
 msgstr "Mainkan bunyi dan maklumkan saya apabila giliran saya hampir tiba"
+
+msgid "paused"
+msgstr "dijeda"
+
+msgid "A paused counter is not offered the next ticket."
+msgstr "Kaunter yang dijeda tidak ditawarkan tiket seterusnya."
+
+msgid "This counter is paused. Resume it to call the next ticket."
+msgstr "Kaunter ini dijeda. Sambung semula untuk memanggil tiket seterusnya."
+
+msgid "Finish or mark the current ticket as no-show before pausing."
+msgstr "Selesaikan atau tandakan tiket semasa sebagai tidak hadir sebelum menjeda."
+
+msgid "Ticket %(code)s is %(status)s; it cannot be transferred."
+msgstr "Tiket %(code)s berstatus %(status)s; tidak boleh dipindahkan."
+
+msgid "Only tickets of today can be transferred."
+msgstr "Hanya tiket hari ini boleh dipindahkan."
+
+msgid "Choose a service of this branch."
+msgstr "Pilih perkhidmatan cawangan ini."
+
+msgid "The ticket is already in this service."
+msgstr "Tiket sudah berada dalam perkhidmatan ini."
+
+msgid "Counter paused."
+msgstr "Kaunter dijeda."
+
+msgid "Counter resumed."
+msgstr "Kaunter disambung semula."
+
+msgid "Ticket %(old)s moved to %(service)s as %(new)s."
+msgstr "Tiket %(old)s dipindahkan ke %(service)s sebagai %(new)s."
+
+msgid "Paused"
+msgstr "Dijeda"
+
+msgid "This counter is paused: it is not offered new tickets."
+msgstr "Kaunter ini dijeda: tiket baharu tidak ditawarkan."
+
+msgid "Resume counter"
+msgstr "Sambung semula kaunter"
+
+msgid "Pause counter"
+msgstr "Jeda kaunter"
+
+msgid "Transfer to another service"
+msgstr "Pindah ke perkhidmatan lain"
+
+msgid "Move %(code)s to"
+msgstr "Pindahkan %(code)s ke"
+
+msgid "Transfer"
+msgstr "Pindah"
+
+msgid "Too many requests"
+msgstr "Terlalu banyak permintaan"
+
+msgid "Please slow down"
+msgstr "Sila perlahankan"
+
+msgid "Too many requests came from your connection. Please wait %(seconds)s seconds and try again."
+msgstr "Terlalu banyak permintaan datang daripada sambungan anda. Sila tunggu %(seconds)s saat dan cuba lagi."
+
+msgid "Back to the start"
+msgstr "Kembali ke mula"

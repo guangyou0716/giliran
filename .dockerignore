@@ -1,0 +1,16 @@
+.git
+.github
+.venv
+.env
+.env.*
+!.env.example
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+db.sqlite3
+staticfiles
+test-results
+playwright-report
+docs
+tests

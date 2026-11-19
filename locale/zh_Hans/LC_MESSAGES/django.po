@@ -830,3 +830,69 @@ msgstr "快轮到您了！请在柜台附近等候。"
 
 msgid "Play a sound and notify me when it is almost my turn"
 msgstr "快轮到我时播放提示音并通知我"
+
+msgid "paused"
+msgstr "已暂停"
+
+msgid "A paused counter is not offered the next ticket."
+msgstr "暂停的柜台不会被分配下一张号。"
+
+msgid "This counter is paused. Resume it to call the next ticket."
+msgstr "此柜台已暂停。请先恢复后再叫下一号。"
+
+msgid "Finish or mark the current ticket as no-show before pausing."
+msgstr "暂停前请先完成当前号码或标记为未到。"
+
+msgid "Ticket %(code)s is %(status)s; it cannot be transferred."
+msgstr "号码 %(code)s 当前状态为 %(status)s，无法转移。"
+
+msgid "Only tickets of today can be transferred."
+msgstr "只能转移今天的号码。"
+
+msgid "Choose a service of this branch."
+msgstr "请选择本分店的服务。"
+
+msgid "The ticket is already in this service."
+msgstr "该号码已在此服务中。"
+
+msgid "Counter paused."
+msgstr "柜台已暂停。"
+
+msgid "Counter resumed."
+msgstr "柜台已恢复。"
+
+msgid "Ticket %(old)s moved to %(service)s as %(new)s."
+msgstr "号码 %(old)s 已转到 %(service)s，新号码为 %(new)s。"
+
+msgid "Paused"
+msgstr "已暂停"
+
+msgid "This counter is paused: it is not offered new tickets."
+msgstr "此柜台已暂停：不会分配新号码。"
+
+msgid "Resume counter"
+msgstr "恢复柜台"
+
+msgid "Pause counter"
+msgstr "暂停柜台"
+
+msgid "Transfer to another service"
+msgstr "转到其他服务"
+
+msgid "Move %(code)s to"
+msgstr "将 %(code)s 转到"
+
+msgid "Transfer"
+msgstr "转移"
+
+msgid "Too many requests"
+msgstr "请求过多"
+
+msgid "Please slow down"
+msgstr "请稍等一下"
+
+msgid "Too many requests came from your connection. Please wait %(seconds)s seconds and try again."
+msgstr "您的网络连接请求过多。请等待 %(seconds)s 秒后重试。"
+
+msgid "Back to the start"
+msgstr "返回首页"

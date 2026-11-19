@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Too many requests" %}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{% translate "Please slow down" %}</h1>
+  <p>{% blocktranslate with seconds=window %}Too many requests came from your connection. Please wait {{ seconds }} seconds and try again.{% endblocktranslate %}</p>
+  <p><a class="btn" href="{% url 'home' %}">{% translate "Back to the start" %}</a></p>
+</section>
+{% endblock %}

@@ -23,6 +23,7 @@ from ..forms import (
 )
 from ..models import Booking, Branch, Slot
 from ..permissions import require_manager, require_staff
+from ..ratelimit import rate_limited
 
 # --- Customer pages (no account) ------------------------------------------------------------
 
@@ -32,6 +33,7 @@ def booking_days(now=None):
     return [today + timedelta(days=i) for i in range(max(settings.GILIRAN_BOOKING_DAYS, 1))]
 
 
+@rate_limited("book")
 def book(request, slug):
     branch = get_object_or_404(Branch, slug=slug)
     now = timezone.now()
