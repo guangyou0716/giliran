@@ -69,12 +69,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: requirements-dev.txt
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext
       - run: pip install -r requirements-dev.txt
       - name: Select database
         if: matrix.database == 'postgres'
         run: echo "DATABASE_URL=postgres://giliran:giliran@localhost:5432/giliran" >> "$GITHUB_ENV"
-      - run: python manage.py compilemessages --ignore=.venv
+      # Valid .po files and committed .mo files up to date (Babel; no apt / GNU gettext needed).
+      - run: python scripts/messages.py
       - run: python manage.py check
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py migrate --noinput
