@@ -152,7 +152,7 @@ legend { font-weight: 700; margin-bottom: .5rem; }
 .board ol, .board ul { list-style: none; padding: 0; margin: 0 0 2rem; }
 .board-serving li { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 1.5rem; padding: .75rem 1.25rem; margin-bottom: .75rem; background: #16293a; border-radius: 16px; font-size: clamp(2rem, 5vw, 4.5rem); font-weight: 900; }
 .board-serving li:first-child { background: #0b7a75; animation: pulse 2s ease-in-out 3; }
-.board-serving .counter { font-size: .55em; font-weight: 700; color: #e2e8f0; }
+.board-serving .counter { font-size: .55em; font-weight: 700; color: #fff; }
 .board-serving .arrow { font-size: .5em; color: #9fb3c8; }
 .board-next ol li { display: inline-block; margin: 0 .5rem .5rem 0; padding: .4rem .9rem; border-radius: 10px; background: #16293a; font-size: clamp(1.25rem, 2.5vw, 2rem); font-weight: 800; }
 .board-services li { display: flex; justify-content: space-between; padding: .5rem 0; border-bottom: 1px solid #23384a; font-size: clamp(1rem, 1.6vw, 1.4rem); }
@@ -172,6 +172,7 @@ legend { font-weight: 700; margin-bottom: .5rem; }
 .slot-choice input:focus-visible + .slot-body { outline: 3px solid #f59e0b; outline-offset: 2px; }
 .booking-time { font-size: clamp(1.6rem, 7vw, 2.2rem); font-weight: 900; margin: .25rem 0 .5rem; font-variant-numeric: tabular-nums; }
 .stats dd.small-dd { font-size: 1.1rem; overflow-wrap: anywhere; }
+.pill-paused { background: #fef3c7; color: #78350f; }
 .pill-booked { background: var(--primary-soft); color: var(--primary); }
 .pill.status-booked { background: var(--primary-soft); color: var(--primary); }
 .pill.status-checked_in { background: #e7f6ec; color: var(--ok); }
@@ -192,3 +193,10 @@ input[type=time] { width: 100%; padding: .65rem .75rem; border: 1px solid var(--
 .bar-cell { min-width: 180px; }
 .bar { display: inline-block; vertical-align: middle; width: 120px; height: .8rem; margin-right: .5rem; background: var(--primary-soft); border-radius: 4px; overflow: hidden; }
 .bar > span { display: block; height: 100%; background: var(--primary); }
+
+.board-paused { margin-top: 1rem; padding: .5rem 1rem; border-radius: 12px; background: #4a3b12; color: #fde68a; font-size: clamp(1rem, 2vw, 1.6rem); font-weight: 700; }
+.transfer { margin-top: .75rem; }
+.transfer summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--primary); }
+.queue-list .transfer { display: inline-block; margin: 0 0 0 .5rem; }
+.transfer form { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.transfer select { width: auto; }

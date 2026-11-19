@@ -20,6 +20,7 @@
           <li class="empty">—</li>
         {% endfor %}
       </ol>
+      <p class="board-paused" data-list="paused" data-label="{% translate 'Paused' %}"{% if not data.paused %} hidden{% endif %}>{% if data.paused %}{% translate "Paused" %}: {{ data.paused|join:", " }}{% endif %}</p>
     </section>
     <section class="board-next">
       <h2>{% translate "Next" %}</h2>

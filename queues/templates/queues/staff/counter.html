@@ -2,7 +2,7 @@
 {% block title %}{{ counter.name }}{% endblock %}
 {% block content %}
 <p class="eyebrow"><a href="{% url 'staff:dashboard' %}">{{ branch.name }}</a></p>
-<h1>{{ counter.name }}</h1>
+<h1>{{ counter.name }}{% if counter.is_paused %} <span class="pill pill-paused">{% translate "Paused" %}</span>{% endif %}</h1>
 <div class="console">
   <section class="card current" aria-live="polite">
     <h2>{% translate "Current ticket" %}</h2>
@@ -18,10 +18,17 @@
         {% endif %}
         <button name="action" value="done" class="btn{% if current.status == 'serving' %} btn-primary{% endif %}">{% translate "Done" %}</button>
       </form>
+      {% include "queues/staff/_transfer.html" with ticket=current services=transfer_services %}
     {% else %}
       <p class="muted">{% translate "No ticket at this counter." %}</p>
-      <form method="post" action="{% url 'staff:counter_action' counter.pk %}">{% csrf_token %}
-        <button name="action" value="call_next" class="btn btn-primary btn-big" {% if not waiting %}disabled{% endif %}>{% translate "Call next" %}</button>
+      {% if counter.is_paused %}<p class="notice" role="status">{% translate "This counter is paused: it is not offered new tickets." %}</p>{% endif %}
+      <form method="post" action="{% url 'staff:counter_action' counter.pk %}" class="btn-row">{% csrf_token %}
+        {% if counter.is_paused %}
+          <button name="action" value="resume" class="btn btn-primary btn-big">{% translate "Resume counter" %}</button>
+        {% else %}
+          <button name="action" value="call_next" class="btn btn-primary btn-big" {% if not waiting %}disabled{% endif %}>{% translate "Call next" %}</button>
+          <button name="action" value="pause" class="btn">{% translate "Pause counter" %}</button>
+        {% endif %}
       </form>
     {% endif %}
   </section>
@@ -29,7 +36,8 @@
     <h2>{% translate "Waiting" %} <span class="count">{{ waiting|length }}</span></h2>
     <ol class="queue-list">
       {% for t in waiting %}
-        <li><strong>{{ t.code }}</strong> {% if t.priority %}<span class="pill pill-priority">{% translate "Priority" %}</span>{% endif %}{% if t.source == "booking" %} <span class="pill pill-booked">{% if t.appointment_at %}{% blocktranslate with time=t.appointment_at|time:"H:i" %}Booked {{ time }}{% endblocktranslate %}{% else %}{% translate "Booked (late)" %}{% endif %}</span>{% endif %} <span class="muted">{{ t.nickname }}</span> <span class="muted small">{{ t.created_at|time:"H:i" }}</span></li>
+        <li><strong>{{ t.code }}</strong> {% if t.priority %}<span class="pill pill-priority">{% translate "Priority" %}</span>{% endif %}{% if t.source == "booking" %} <span class="pill pill-booked">{% if t.appointment_at %}{% blocktranslate with time=t.appointment_at|time:"H:i" %}Booked {{ time }}{% endblocktranslate %}{% else %}{% translate "Booked (late)" %}{% endif %}</span>{% endif %} <span class="muted">{{ t.nickname }}</span> <span class="muted small">{{ t.created_at|time:"H:i" }}</span>
+          {% include "queues/staff/_transfer.html" with ticket=t services=transfer_services %}</li>
       {% empty %}
         <li class="empty">{% translate "Nobody is waiting." %}</li>
       {% endfor %}
@@ -39,8 +47,8 @@
     <h2>{% translate "Add walk-in" %}</h2>
     <form method="post" action="{% url 'staff:walk_in' branch.slug %}">{% csrf_token %}
       <input type="hidden" name="next" value="{{ request.path }}">
-      <label for="{{ walkin_form.service.id_for_label }}">{% translate "Service" %}</label>
-      <select name="service" id="{{ walkin_form.service.id_for_label }}" required>
+      <label for="walkin-service">{% translate "Service" %}</label>
+      <select name="service" id="walkin-service" required>
         {% for s in counter.services.all %}{% if s.is_active %}<option value="{{ s.pk }}">{{ s }}</option>{% endif %}{% endfor %}
       </select>
       <label for="{{ walkin_form.nickname.id_for_label }}">{{ walkin_form.nickname.label }}</label>

@@ -7,6 +7,7 @@ staff_patterns = (
         path("", staff.dashboard, name="dashboard"),
         path("counters/<int:pk>/", staff.counter_console, name="counter"),
         path("counters/<int:pk>/action/", staff.counter_action, name="counter_action"),
+        path("tickets/<int:pk>/transfer/", staff.ticket_transfer, name="ticket_transfer"),
         path("b/<slug:slug>/walk-in/", staff.walk_in, name="walk_in"),
         path("b/<slug:slug>/tickets/", staff.ticket_history, name="history"),
         path("b/<slug:slug>/appointments/", appointments.appointments, name="appointments"),
@@ -43,6 +44,7 @@ api_patterns = (
 
 urlpatterns = [
     path("", public.home, name="home"),
+    path("healthz/", public.healthz, name="healthz"),
     path("b/<slug:slug>/join/", public.join, name="join"),
     path("b/<slug:slug>/board/", public.board, name="board"),
     path("t/<uuid:token>/", public.ticket, name="ticket"),

@@ -48,6 +48,10 @@ Screenshots are taken by the Playwright end-to-end test from a local run on synt
   no-shows 10 minutes after their time (`python manage.py expire_bookings` from cron; the staff page also does it).
 - **Slot management** for managers: generate slots for a service and day (from / until / minutes per slot / seats),
   change seats (never below what is booked) or close a slot, delete slots without bookings.
+- **Transfer a ticket** to another service (staff, at the counter console, for the ticket being served or any waiting
+  one): see [Transfers, pause, limits and privacy](#transfers-pause-limits-and-privacy).
+- **Pause a counter** (break): a paused counter is not offered the next ticket; the console, dashboard and display
+  board show it as paused.
 - **Ticket history** with search (ticket code / nickname), filters (status, service, day) and pagination.
 - **Reports** for managers (`/manage/b/<branch>/reports/`): for a date range (up to 92 days, Malaysia time) and
   optionally one service: tickets, served, average and median wait, average service time, no-shows and no-show
@@ -60,7 +64,9 @@ Screenshots are taken by the Playwright end-to-end test from a local run on synt
 - **i18n**: all UI strings in English, Bahasa Melayu and Simplified Chinese (a test fails if one is missing);
   language switcher in the header.
 - **Accessibility**: semantic forms and tables, `aria-live` status regions, skip link, visible focus,
-  44 px touch targets, reduced-motion support.
+  44 px touch targets, reduced-motion support; an [axe-core audit](#accessibility-audit) runs in the browser tests.
+- **Abuse and privacy controls**: per-IP rate limit on joining and booking (HTTP 429 with a friendly page) and a
+  phone-number retention purge for old bookings.
 
 ## Live updates
 
@@ -155,10 +161,74 @@ names correctly, keeps English column names for scripts, and prefixes any text c
 tab or CR with `'` so a spreadsheet never runs it as a formula. `seed_demo` writes 14 days of synthetic history
 (fixed random seed) so the page has data on a fresh install.
 
+## Transfers, pause, limits and privacy
+
+**Transfer between services.** On the counter console every waiting ticket and the current ticket has *Transfer to
+another service* (staff or manager of the branch; today's tickets only; not for finished tickets). The ticket goes back
+to *waiting* in the other service with a **new number and code** from that service's daily sequence (numbers stay unique
+per service and day), and the counter it held is freed. It **keeps its queue time**, priority and appointment time, so
+it takes its place by arrival time: it neither goes to the back nor jumps ahead of people who arrived before it. Calls and
+service times of the first service are cleared (the wait in reports runs from arrival to the final call). Every
+transfer is a `TicketEvent` with action `transfer`, the actor, the old counter and a note such as `A-003 -> P-004`; the
+ticket page and board follow within a second or two because the live streams watch those events (the ticket page
+switches to the new number and alerts again when it is called).
+
+**Pause a counter.** *Pause counter* (not possible while it holds a ticket) stops "Call next" there until *Resume
+counter*; the console shows a *Paused* badge, the dashboard lists it as paused and the display board shows
+"Paused: Room 1". A paused counter does not count in wait estimates (no active counter left means no estimate). The
+board picks the change up at its next refresh (10 s at most).
+
+**Rate limit.** `POST` to the public join (`/b/<branch>/join/`) and booking (`/b/<branch>/book/`) forms is limited per
+client IP: `GILIRAN_RATE_LIMIT_MAX` (10) requests per `GILIRAN_RATE_LIMIT_WINDOW` (60) seconds, counted per
+endpoint in the Django cache; past that the visitor gets HTTP 429 with a friendly page and a `Retry-After` header.
+Viewing pages is never limited; `GILIRAN_RATE_LIMIT_MAX=0` turns it off. The default cache is process memory, so the
+limit is per worker process (the Docker image runs one process with many threads); use a shared cache backend if you run
+several. Behind a reverse proxy set `GILIRAN_TRUST_PROXY=1` so the last `X-Forwarded-For` entry (added by your proxy) is
+the client address; do not enable it when clients can reach the app directly.
+
+**Phone retention.** Booking phone numbers are the only phone numbers stored (tickets keep at most a nickname).
+`python manage.py purge_phones` blanks the phone of every booking whose slot started more than
+`GILIRAN_PHONE_RETENTION_DAYS` (30) days ago (or `--days N`); reference, nickname, status and times stay so reports keep
+working. It is idempotent (already blank rows are not touched; the second run reports 0), so run it daily from cron:
+`15 3 * * * cd /app && python manage.py purge_phones`. Blank phones show as "—" on staff screens.
+
+## Docker Compose
+
+Needs Docker with Compose v2. Web (Django + gunicorn, static files by WhiteNoise) and PostgreSQL 16:
+
+```bash
+cp .env.example .env
+# edit .env: set DJANGO_SECRET_KEY (python -c "import secrets; print(secrets.token_urlsafe(50))"),
+# and for demo data GILIRAN_SEED_DEMO=1 plus GILIRAN_DEMO_PASSWORD=choose-a-demo-password
+docker compose up --build
+```
+
+Open http://localhost:8000/ (`GILIRAN_PORT` changes the port). The `web` container waits for the database healthcheck,
+applies migrations, optionally seeds the synthetic demo data (`GILIRAN_SEED_DEMO=1`, idempotent) and starts gunicorn
+with one process and 32 threads (`GUNICORN_THREADS`; every open live stream uses a thread). Its healthcheck calls
+`/healthz/` (answers 200 `ok` when the database responds, 503 otherwise). Data lives in the `giliran-db` volume;
+`docker compose down -v` deletes it. Notes: Compose sets `DJANGO_SECURE_COOKIES=0` so login works over plain
+`http://localhost`; behind HTTPS set it to 1 and set `DJANGO_ALLOWED_HOSTS` and `DJANGO_CSRF_TRUSTED_ORIGINS`.
+Run the daily purge with `docker compose exec web python manage.py purge_phones` (cron on the host). CI builds the image,
+starts the stack and smoke-tests it on every push. No credentials are baked into the image (the `build-only` key used
+for `collectstatic` exists only in that build layer).
+
+## Accessibility audit
+
+`pytest -m e2e` runs [axe-core](https://github.com/dequelabs/axe-core) (shipped with the `axe-playwright-python` dev
+dependency) in Chromium on the key pages: home, join, booking (choose and times), booking link, ticket, display board,
+rate-limit page and staff login in English, Bahasa Melayu and Simplified Chinese, plus the staff dashboard and counter
+console. The test fails on any **serious or critical** violation and prints the rule, selector and fix hint. The first
+run found four real problems that are fixed: a select without a label in the walk-in form, low contrast of the counter name on the
+board, a `<ul role="status">` that broke list semantics, and (found by the transfer test) the ticket page not
+updating its number after a transfer. Automated checks find only part of all accessibility problems, so keyboard and
+screen reader checks are still worth doing by hand.
+
 ## Stack
 
-Python 3.12+ · Django 5.2 · PostgreSQL 16 (SQLite for quick local runs) · server-rendered templates + plain CSS
-+ a small vanilla JS file (no CDN, no build step) · pytest + pytest-django · Playwright · ruff · GitHub Actions.
+Python 3.12+ · Django 5.2 · PostgreSQL 16 (SQLite for quick local runs) · gunicorn + WhiteNoise · Docker Compose ·
+server-rendered templates + plain CSS + a small vanilla JS file (no CDN, no build step) · pytest + pytest-django ·
+Playwright + axe-core · ruff · GitHub Actions.
 
 ## Run locally
 
@@ -198,7 +268,8 @@ pytest -m "not e2e"                      # unit + integration (engine, views, AP
 python -m playwright install chromium
 pytest -m e2e                            # browser: join -> call -> board -> history; book -> check in -> call;
                                          # manager reports -> filter -> CSV download; live push (SSE) with the
-                                         # "almost your turn" alert (audio stubbed) and the polling fallback
+                                         # "almost your turn" alert (audio stubbed) and the polling fallback;
+                                         # pause / resume and ticket transfer; axe accessibility audit
 ```
 
 Set `DATABASE_URL` to a PostgreSQL database to also run the concurrency tests (they are skipped on SQLite).
@@ -208,8 +279,11 @@ Set `DATABASE_URL` to a PostgreSQL database to also run the concurrency tests (t
 1. ~~Appointments~~ (done): slots with capacity, booking link, check-in into the queue, no-shows.
 2. ~~Reports~~ (done): waits, service time and no-show rate per service / hour, CSV export.
 3. ~~Live updates~~ (done): Server-Sent Events with polling fallback; "almost your turn" alert and chime.
-4. Docker Compose (web + PostgreSQL), transfer a ticket between services, counter pause, rate limits on joining
-   and booking, phone retention purge for old bookings, axe accessibility audit.
+4. ~~Docker Compose, ticket transfer, counter pause, rate limits, phone retention purge, axe audit~~ (done; the MVP
+   is feature complete).
+
+Ideas beyond the MVP: SMS / WhatsApp "you are next" messages, per-service opening hours, a shared cache for the rate
+limit across processes, optional CAPTCHA, a daily trend chart in reports.
 
 ## License
 

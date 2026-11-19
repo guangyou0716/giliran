@@ -1,0 +1,49 @@
+# giliran: web (Django + gunicorn) + PostgreSQL 16.
+#
+#   cp .env.example .env     # then set DJANGO_SECRET_KEY (and GILIRAN_DEMO_PASSWORD for demo data)
+#   docker compose up --build
+#   open http://localhost:8000/
+#
+# The settings below read the same variables as .env.example (Compose loads .env automatically).
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: giliran
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-giliran}
+      POSTGRES_DB: giliran
+    volumes:
+      - giliran-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U giliran -d giliran"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DJANGO_DEBUG: "0"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env (see .env.example)}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      # Secure cookies need HTTPS; plain http://localhost needs them off. Put the app behind
+      # an HTTPS proxy and set this to 1 for anything beyond a local try-out.
+      DJANGO_SECURE_COOKIES: ${DJANGO_SECURE_COOKIES:-0}
+      DATABASE_URL: postgres://giliran:${POSTGRES_PASSWORD:-giliran}@db:5432/giliran
+      GILIRAN_SEED_DEMO: ${GILIRAN_SEED_DEMO:-0}
+      GILIRAN_DEMO_PASSWORD: ${GILIRAN_DEMO_PASSWORD:-}
+      GILIRAN_RATE_LIMIT_MAX: ${GILIRAN_RATE_LIMIT_MAX:-10}
+      GILIRAN_RATE_LIMIT_WINDOW: ${GILIRAN_RATE_LIMIT_WINDOW:-60}
+      GILIRAN_TRUST_PROXY: ${GILIRAN_TRUST_PROXY:-0}
+      GILIRAN_PHONE_RETENTION_DAYS: ${GILIRAN_PHONE_RETENTION_DAYS:-30}
+    ports:
+      - "${GILIRAN_PORT:-8000}:8000"
+    restart: unless-stopped
+
+volumes:
+  giliran-db:

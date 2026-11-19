@@ -2,6 +2,8 @@
 
 from django.conf import settings
 from django.contrib import messages
+from django.db import connection
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
@@ -9,6 +11,18 @@ from django.views.decorators.http import require_POST
 from .. import engine
 from ..forms import JoinForm
 from ..models import Branch, Ticket
+from ..ratelimit import rate_limited
+
+
+def healthz(request):
+    """Liveness + database check for the container healthcheck and load balancers."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+    except Exception:  # noqa: BLE001 - any database failure means "not healthy"
+        return HttpResponse("database unavailable", status=503, content_type="text/plain")
+    return HttpResponse("ok", content_type="text/plain")
 
 
 def home(request):
@@ -16,6 +30,7 @@ def home(request):
     return render(request, "queues/home.html", {"branches": branches})
 
 
+@rate_limited("join")
 def join(request, slug):
     branch = get_object_or_404(Branch, slug=slug)
     form = JoinForm(request.POST or None, branch=branch)

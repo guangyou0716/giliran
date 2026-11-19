@@ -4,3 +4,4 @@ pytest-django>=4.14.0,<5
 pytest-playwright>=0.10.0,<1
 ruff>=0.17.5,<1
 Babel==2.18.0
+axe-playwright-python>=0.1.8,<1

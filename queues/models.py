@@ -93,6 +93,11 @@ class Counter(models.Model):
     name = models.CharField(_("name"), max_length=40)
     services = models.ManyToManyField(Service, related_name="counters", verbose_name=_("services"))
     is_active = models.BooleanField(_("active"), default=True)
+    is_paused = models.BooleanField(
+        _("paused"),
+        default=False,
+        help_text=_("A paused counter is not offered the next ticket."),
+    )
 
     class Meta:
         ordering = ["branch", "name"]
@@ -211,6 +216,8 @@ class TicketEvent(models.Model):
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
     )
+    # Free text detail, e.g. "A-003 -> P-004" for a transfer between services.
+    note = models.CharField(max_length=60, blank=True)
     at = models.DateTimeField()
 
     class Meta:
@@ -287,7 +294,8 @@ class Booking(models.Model):
     ref = models.CharField(_("booking reference"), max_length=8, unique=True)
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     nickname = models.CharField(_("nickname"), max_length=40)
-    phone = models.CharField(_("phone"), max_length=16, validators=[phone_validator])
+    # Blank after the retention purge (``manage.py purge_phones``).
+    phone = models.CharField(_("phone"), max_length=16, blank=True, validators=[phone_validator])
     status = models.CharField(
         _("status"), max_length=12, choices=Status.choices, default=Status.BOOKED
     )
@@ -309,7 +317,8 @@ class Booking(models.Model):
             # One phone number cannot hold two seats in the same slot.
             models.UniqueConstraint(
                 fields=["slot", "phone"],
-                condition=Q(status__in=["booked", "checked_in"]),
+                # A purged (blank) phone is not a number: many purged rows may share it.
+                condition=Q(status__in=["booked", "checked_in"]) & ~Q(phone=""),
                 name="one_active_booking_per_phone_per_slot",
             ),
         ]
@@ -322,4 +331,4 @@ class Booking(models.Model):
     @property
     def phone_masked(self) -> str:
         """Only the last 4 digits, for screens other people can see."""
-        return "•••• " + self.phone[-4:]
+        return "•••• " + self.phone[-4:] if self.phone else "—"

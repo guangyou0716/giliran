@@ -121,3 +121,39 @@ jobs:
           path: test-results/screenshots
           if-no-files-found: ignore
           retention-days: 7
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DJANGO_SECRET_KEY: ci-compose-secret-not-for-production
+      GILIRAN_SEED_DEMO: "1"
+      GILIRAN_DEMO_PASSWORD: ci-demo-pass
+      GILIRAN_PORT: "18000"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - run: docker compose config --quiet
+      - run: docker compose build
+      - run: docker compose up -d
+      - name: Wait for the web container to be healthy
+        run: |
+          for i in $(seq 1 40); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q web)")
+            echo "web: $status"
+            [ "$status" = "healthy" ] && exit 0
+            sleep 3
+          done
+          docker compose logs
+          exit 1
+      - name: Smoke test (health, join page, static file, demo data)
+        run: |
+          curl -fsS http://localhost:18000/healthz/
+          curl -fsS http://localhost:18000/b/seri-mawar/join/ | grep -q "Take a number"
+          curl -fsS -o /dev/null http://localhost:18000/static/queues/app.css
+          curl -fsS http://localhost:18000/b/seri-mawar/board/ | grep -q "Now serving"
+      - if: always()
+        run: docker compose logs --no-color | tail -n 80
+      - if: always()
+        run: docker compose down -v

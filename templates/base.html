@@ -38,9 +38,11 @@
 {% endblock %}
 <main id="main" class="{% block main_class %}container{% endblock %}">
   {% if messages %}
-    <ul class="messages" role="status">
-      {% for message in messages %}<li class="msg msg-{{ message.tags }}">{{ message }}</li>{% endfor %}
-    </ul>
+    <div role="status">
+      <ul class="messages">
+        {% for message in messages %}<li class="msg msg-{{ message.tags }}">{{ message }}</li>{% endfor %}
+      </ul>
+    </div>
   {% endif %}
   {% block content %}{% endblock %}
 </main>

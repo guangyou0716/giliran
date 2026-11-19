@@ -105,3 +105,16 @@ def test_parallel_cancel_and_book_keep_count_exact(consult):
     assert slot.booked_count == active <= slot.capacity
     assert results.count("cancelled") == 4
     assert active == results.count("booked")
+
+
+def test_parallel_transfers_and_joins_into_one_service_get_unique_numbers(consult, pharmacy):
+    tickets = [engine.issue_ticket(consult) for _ in range(4)]
+
+    def work(i):
+        if i < 4:
+            return engine.transfer_ticket(tickets[i], pharmacy).number
+        return engine.issue_ticket(pharmacy).number
+
+    _run_parallel(8, work)
+    numbers = sorted(Ticket.objects.filter(service=pharmacy).values_list("number", flat=True))
+    assert numbers == list(range(1, 9))

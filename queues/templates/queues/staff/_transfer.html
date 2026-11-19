@@ -1,0 +1,11 @@
+{% load i18n %}<details class="transfer">
+  <summary>{% translate "Transfer to another service" %}</summary>
+  <form method="post" action="{% url 'staff:ticket_transfer' ticket.pk %}" class="inline-form">{% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <label for="transfer-{{ ticket.pk }}">{% blocktranslate with code=ticket.code %}Move {{ code }} to{% endblocktranslate %}</label>
+    <select name="service" id="transfer-{{ ticket.pk }}" required>
+      {% for s in services %}{% if s.pk != ticket.service_id %}<option value="{{ s.pk }}">{{ s }}</option>{% endif %}{% endfor %}
+    </select>
+    <button type="submit" class="btn">{% translate "Transfer" %}</button>
+  </form>
+</details>

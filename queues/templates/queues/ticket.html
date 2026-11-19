@@ -4,13 +4,13 @@
 <section class="card narrow ticket status-{{ t.status }}" id="ticket"
   data-poll-url="{% url 'api:ticket' t.token %}" data-poll-ms="{{ poll_ms }}"
   {% if sse %}data-stream-url="{% url 'api:ticket_stream' t.token %}"{% endif %}
-  data-status="{{ t.status }}" data-recall-count="{{ t.recall_count }}"
+  data-status="{{ t.status }}" data-code="{{ t.code }}" data-recall-count="{{ t.recall_count }}"
   data-almost-ahead="{{ almost_ahead }}" data-is-almost="{{ is_almost|yesno:'1,0' }}"
   data-t-almost="{% translate 'Almost your turn. People ahead: {n}.' %}"
   data-t-called="{% translate 'Your number {code} is being called. Please go to {counter}.' %}"
   data-t-minutes="{% translate '~{n} min' %}" data-t-next="{% translate 'You are next' %}"
   data-t-none="—">
-  <p class="eyebrow">{{ t.branch.name }} · {{ t.service.name }}</p>
+  <p class="eyebrow">{{ t.branch.name }} · <span data-field="service">{{ t.service.name }}</span></p>
   <p class="ticket-label">{% translate "Your number" %}</p>
   <p class="ticket-code" data-field="code">{{ t.code }}</p>
   <p class="ticket-status" role="status" aria-live="polite">

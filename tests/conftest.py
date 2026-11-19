@@ -90,3 +90,13 @@ def english_by_default():
     translation.activate("en")
     yield
     translation.deactivate()
+
+
+@pytest.fixture(autouse=True)
+def fresh_rate_limit_cache():
+    """Rate limit counters live in the cache; every test starts with empty ones."""
+    from django.core.cache import cache
+
+    cache.clear()
+    yield
+    cache.clear()

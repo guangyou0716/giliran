@@ -90,6 +90,10 @@ class CounterBusy(QueueError):
     pass
 
 
+class CounterPaused(QueueError):
+    pass
+
+
 # action -> (allowed from statuses, to status)
 TRANSITIONS: dict[str, tuple[tuple[str, ...], str]] = {
     "call": ((S.WAITING,), S.CALLED),
@@ -121,8 +125,11 @@ def waiting_order(queryset, now: datetime | None = None):
     ).order_by("queue_rank", "queue_at", "id")
 
 
-def _log(ticket: Ticket, action: str, from_status: str, actor, counter, at: datetime) -> None:
+def _log(
+    ticket: Ticket, action: str, from_status: str, actor, counter, at: datetime, note: str = ""
+) -> None:
     TicketEvent.objects.create(
+        note=note,
         ticket=ticket,
         action=action,
         from_status=from_status,
@@ -203,6 +210,8 @@ def call_next(counter: Counter, *, actor=None, now: datetime | None = None) -> T
         counter = Counter.objects.select_for_update().get(pk=counter.pk)
         if not counter.is_active:
             raise ServiceUnavailable(_("This counter is not active."))
+        if counter.is_paused:
+            raise CounterPaused(_("This counter is paused. Resume it to call the next ticket."))
         if active_ticket(counter) is not None:
             raise CounterBusy(_("Finish or mark the current ticket as no-show first."))
         ticket = (
@@ -249,6 +258,90 @@ def apply_action(ticket: Ticket, action: str, *, actor=None, now: datetime | Non
             fields.append("finished_at")
         ticket.save(update_fields=fields)
         _log(ticket, action, from_status, actor, ticket.counter, now)
+        return ticket
+
+
+def set_paused(counter: Counter, paused: bool) -> Counter:
+    """Pause (break) or resume a counter. A counter holding a ticket cannot pause.
+
+    A paused counter is not offered the next ticket (``call_next``), is shown as paused on
+    the console and the display board, and does not count in wait estimates.
+    """
+    with transaction.atomic():
+        counter = Counter.objects.select_for_update().get(pk=counter.pk)
+        if paused and active_ticket(counter) is not None:
+            raise CounterBusy(_("Finish or mark the current ticket as no-show before pausing."))
+        if counter.is_paused != paused:
+            counter.is_paused = paused
+            counter.save(update_fields=["is_paused"])
+        return counter
+
+
+TRANSFERABLE = (S.WAITING, S.CALLED, S.SERVING)
+
+
+def transfer_ticket(
+    ticket: Ticket,
+    target: Service,
+    *,
+    actor=None,
+    now: datetime | None = None,
+) -> Ticket:
+    """Move a ticket of today to another service of the same branch (staff action).
+
+    The ticket goes back to WAITING in the target queue with a new number and code from the
+    target's daily sequence (numbers stay unique per service and day), the counter it held
+    is freed. Its queue time (``created_at``), priority and appointment time are kept, so it
+    keeps its place in line by arrival time: it does not go to the back and does not jump
+    ahead of people who arrived earlier. Calls and service times of the earlier service are
+    cleared (``first_called_at`` is set again when the target service calls it), so waits in
+    reports run from arrival to the final call. Recorded as a ``transfer`` TicketEvent
+    (actor, old counter, note "A-003 -> P-004").
+    """
+    now = now or timezone.now()
+    with transaction.atomic():
+        ticket = Ticket.objects.select_for_update().select_related("service").get(pk=ticket.pk)
+        if ticket.status not in TRANSFERABLE:
+            raise InvalidTransition(
+                _("Ticket %(code)s is %(status)s; it cannot be transferred.")
+                % {"code": ticket.code, "status": ticket.get_status_display()}
+            )
+        if ticket.day != local_day(now):
+            raise InvalidTransition(_("Only tickets of today can be transferred."))
+        if target.branch_id != ticket.branch_id:
+            raise ServiceUnavailable(_("Choose a service of this branch."))
+        if target.pk == ticket.service_id:
+            raise ServiceUnavailable(_("The ticket is already in this service."))
+        if not target.is_active:
+            raise ServiceUnavailable(_("This service is not taking tickets right now."))
+        old_code, old_status, old_counter = ticket.code, ticket.status, ticket.counter
+        DailySequence.objects.get_or_create(service=target, day=ticket.day)
+        seq = DailySequence.objects.select_for_update().get(service=target, day=ticket.day)
+        seq.last_number += 1
+        seq.save(update_fields=["last_number"])
+        ticket.service = target
+        ticket.number = seq.last_number
+        ticket.code = format_code(target.prefix, seq.last_number)
+        ticket.status = S.WAITING
+        ticket.counter = None
+        ticket.recall_count = 0
+        ticket.called_at = ticket.first_called_at = ticket.serving_at = None
+        ticket.save(
+            update_fields=[
+                "service",
+                "number",
+                "code",
+                "status",
+                "counter",
+                "recall_count",
+                "called_at",
+                "first_called_at",
+                "serving_at",
+            ]
+        )
+        _log(
+            ticket, "transfer", old_status, actor, old_counter, now, f"{old_code} -> {ticket.code}"
+        )
         return ticket
 
 
@@ -315,7 +408,7 @@ def ticket_view(ticket: Ticket, *, now: datetime | None = None) -> TicketView:
     ahead = people_ahead(ticket, now=now)
     eta = None
     if ahead is not None:
-        counters = ticket.service.counters.filter(is_active=True).count()
+        counters = ticket.service.counters.filter(is_active=True, is_paused=False).count()
         eta = estimate_wait_minutes(ahead, ticket.service.avg_minutes, counters)
     return TicketView(ticket, ahead, eta)
 
@@ -347,6 +440,7 @@ def board(branch: Branch, *, now: datetime | None = None, next_limit: int = 6) -
             }
             for t in serving
         ],
+        "paused": [c.name for c in branch.counters.filter(is_active=True, is_paused=True)],
         "next": [t.code for t in waiting[:next_limit]],
         "services": services,
         "waiting_total": waiting.count(),
@@ -469,6 +563,23 @@ def expire_bookings(*, now: datetime | None = None, branch: Branch | None = None
     if branch is not None:
         late = late.filter(slot__service__branch=branch)
     return late.update(status=B.NO_SHOW)
+
+
+def purge_phones(days: int | None = None, *, now: datetime | None = None) -> int:
+    """Blank the phone number of bookings whose slot started more than ``days`` days ago.
+
+    ``days`` defaults to ``GILIRAN_PHONE_RETENTION_DAYS``. Idempotent: rows that are already
+    blank are not touched, so a second run returns 0. Only the phone is removed; the reference,
+    nickname, status and times stay for reports. Tickets store no phone number at all (a
+    customer joining the queue gives a nickname at most), so there is nothing to purge there.
+    Returns how many bookings were changed.
+    """
+    days = settings.GILIRAN_PHONE_RETENTION_DAYS if days is None else days
+    if days < 1:
+        raise ValueError("retention must be at least 1 day")
+    now = now or timezone.now()
+    old = Booking.objects.filter(slot__starts_at__lt=now - timedelta(days=days)).exclude(phone="")
+    return old.update(phone="")
 
 
 def check_in(

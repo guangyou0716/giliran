@@ -174,6 +174,14 @@
     if (toggleBox) toggleBox.hidden = TERMINAL.indexOf(ticket.dataset.status) !== -1;
 
     var render = function (d) {
+      if (d.code !== ticket.dataset.code) {
+        // Staff moved the ticket to another service: new number, so alert again for it.
+        ticket.dataset.code = d.code;
+        alerts.fired = {};
+        document.title = d.code + " · giliran";
+      }
+      setText(ticket, "code", d.code);
+      setText(ticket, "service", d.service);
       ticket.className = ticket.className.replace(/status-\S+/, "status-" + d.status);
       ticket.dataset.status = d.status;
       setText(ticket, "status_label", d.status_label);
@@ -220,6 +228,11 @@
         li.appendChild(el("span", "counter", s.counter));
         serving.appendChild(li);
       });
+      var paused = board.querySelector('[data-list="paused"]');
+      if (paused) {
+        paused.hidden = !(d.paused && d.paused.length);
+        paused.textContent = paused.hidden ? "" : (paused.dataset.label || "Paused") + ": " + d.paused.join(", ");
+      }
       next.replaceChildren();
       if (!d.next.length) next.appendChild(el("li", "empty", "—"));
       d.next.forEach(function (code) { next.appendChild(el("li", "", code)); });

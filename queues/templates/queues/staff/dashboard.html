@@ -13,7 +13,7 @@
   <ul class="grid compact">
     {% for c in row.branch.counters.all %}
       <li class="card inner{% if not c.is_active %} inactive{% endif %}">
-        <a href="{% url 'staff:counter' c.pk %}" class="stretched">{{ c.name }}</a>
+        <a href="{% url 'staff:counter' c.pk %}" class="stretched">{{ c.name }}</a>{% if c.is_paused %} <span class="pill pill-paused">{% translate "Paused" %}</span>{% endif %}
         <p class="muted small">{% for s in c.services.all %}{{ s.prefix }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
       </li>
     {% empty %}
