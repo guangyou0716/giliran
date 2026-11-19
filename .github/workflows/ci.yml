@@ -69,7 +69,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: requirements-dev.txt
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext
+      # Ubuntu mirrors on the runners time out now and then; retry instead of failing the job.
+      - name: Install gettext (for compilemessages)
+        run: |
+          sudo apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 update
+          sudo apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 install -y --no-install-recommends gettext
       - run: pip install -r requirements-dev.txt
       - name: Select database
         if: matrix.database == 'postgres'
