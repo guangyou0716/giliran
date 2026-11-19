@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Services & counters" %}{% endblock %}
+{% block content %}
+<p class="eyebrow"><a href="{% url 'staff:dashboard' %}">{{ branch.name }}</a></p>
+<h1>{% translate "Services & counters" %}</h1>
+<section class="card">
+  <div class="card-head"><h2>{% translate "Services" %}</h2><a class="btn btn-primary" href="{% url 'manage:service_create' branch.slug %}">{% translate "New service" %}</a></div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th scope="col">{% translate "Prefix" %}</th><th scope="col">{% translate "Name" %}</th><th scope="col">{% translate "Avg. minutes" %}</th><th scope="col">{% translate "Active" %}</th><th scope="col"><span class="sr-only">{% translate "Edit" %}</span></th></tr></thead>
+    <tbody>
+    {% for s in services %}
+      <tr{% if not s.is_active %} class="inactive"{% endif %}><td><strong>{{ s.prefix }}</strong></td><td>{{ s.name }}</td><td>{{ s.avg_minutes }}</td><td>{{ s.is_active|yesno }}</td><td><a href="{% url 'manage:service_edit' branch.slug s.pk %}">{% translate "Edit" %}</a></td></tr>
+    {% empty %}<tr><td colspan="5" class="empty">{% translate "No services yet." %}</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+<section class="card">
+  <div class="card-head"><h2>{% translate "Counters" %}</h2><a class="btn btn-primary" href="{% url 'manage:counter_create' branch.slug %}">{% translate "New counter" %}</a></div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th scope="col">{% translate "Name" %}</th><th scope="col">{% translate "Services" %}</th><th scope="col">{% translate "Active" %}</th><th scope="col"><span class="sr-only">{% translate "Edit" %}</span></th></tr></thead>
+    <tbody>
+    {% for c in counters %}
+      <tr{% if not c.is_active %} class="inactive"{% endif %}><td>{{ c.name }}</td><td>{% for s in c.services.all %}{{ s.prefix }}{% if not forloop.last %}, {% endif %}{% endfor %}</td><td>{{ c.is_active|yesno }}</td><td><a href="{% url 'manage:counter_edit' branch.slug c.pk %}">{% translate "Edit" %}</a></td></tr>
+    {% empty %}<tr><td colspan="4" class="empty">{% translate "No counters yet." %}</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

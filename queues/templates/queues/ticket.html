@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ t.code }}{% endblock %}
+{% block content %}
+<section class="card narrow ticket status-{{ t.status }}" id="ticket"
+  data-poll-url="{% url 'api:ticket' t.token %}" data-poll-ms="{{ poll_ms }}"
+  data-t-minutes="{% translate '~{n} min' %}" data-t-next="{% translate 'You are next' %}"
+  data-t-none="—">
+  <p class="eyebrow">{{ t.branch.name }} · {{ t.service.name }}</p>
+  <p class="ticket-label">{% translate "Your number" %}</p>
+  <p class="ticket-code" data-field="code">{{ t.code }}</p>
+  <p class="ticket-status" role="status" aria-live="polite">
+    <span class="pill" data-field="status_label">{{ t.get_status_display }}</span>
+    {% if t.priority %}<span class="pill pill-priority">{% translate "Priority" %}</span>{% endif %}
+  </p>
+  <p class="called-banner" data-show-when="called serving" {% if t.status != 'called' and t.status != 'serving' %}hidden{% endif %}>
+    {% translate "Please go to" %} <strong data-field="counter">{{ t.counter.name|default:"" }}</strong>
+  </p>
+  <dl class="stats" data-show-when="waiting" {% if t.status != 'waiting' %}hidden{% endif %}>
+    <div><dt>{% translate "People ahead" %}</dt><dd data-field="ahead">{{ view.ahead|default_if_none:"—" }}</dd></div>
+    <div><dt>{% translate "Estimated wait" %}</dt><dd data-field="eta">{{ view.eta_text }}</dd></div>
+  </dl>
+  <p class="help">{% translate "This page updates by itself. Keep it open or bookmark it." %}</p>
+  <form method="post" action="{% url 'ticket_cancel' t.token %}" data-show-when="waiting" {% if t.status != 'waiting' %}hidden{% endif %}>{% csrf_token %}
+    <button type="submit" class="btn btn-danger-outline">{% translate "Cancel my ticket" %}</button>
+  </form>
+</section>
+{% endblock %}

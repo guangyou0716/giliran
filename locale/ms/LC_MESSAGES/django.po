@@ -1,0 +1,434 @@
+# giliran UI translations.
+# This file is distributed under the same license as the giliran package.
+msgid ""
+msgstr ""
+"Project-Id-Version: giliran 0.1\n"
+"Language: ms\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Now serving"
+msgstr "Sedang dilayan"
+
+msgid "Scan the QR code at the entrance to take a number"
+msgstr "Imbas kod QR di pintu masuk untuk mengambil nombor"
+
+msgid "Next"
+msgstr "Seterusnya"
+
+msgid "Waiting"
+msgstr "Menunggu"
+
+msgid "Queues"
+msgstr "Giliran"
+
+msgid "Wait anywhere. We will call your turn."
+msgstr "Tunggu di mana sahaja. Kami akan panggil giliran anda."
+
+msgid "Take a queue number from your phone, see how many people are ahead of you, and come back when it is almost your turn."
+msgstr "Ambil nombor giliran dari telefon anda, lihat berapa orang di hadapan anda, dan kembali apabila giliran anda hampir tiba."
+
+msgid "Branches"
+msgstr "Cawangan"
+
+msgid "Open"
+msgstr "Dibuka"
+
+msgid "Closed for new tickets"
+msgstr "Tidak menerima tiket baharu"
+
+msgid "Take a number"
+msgstr "Ambil nombor"
+
+msgid "Display board"
+msgstr "Papan paparan"
+
+msgid "No branches yet. Run the seed command to add demo data."
+msgstr "Belum ada cawangan. Jalankan arahan seed untuk menambah data demo."
+
+msgid "This branch is not taking new tickets right now. Please ask at the front desk."
+msgstr "Cawangan ini tidak menerima tiket baharu sekarang. Sila bertanya di kaunter hadapan."
+
+msgid "No services are open right now."
+msgstr "Tiada perkhidmatan dibuka sekarang."
+
+msgid "Get my ticket"
+msgstr "Dapatkan tiket saya"
+
+#, python-format
+msgid "%(n)s waiting"
+msgstr "%(n)s menunggu"
+
+msgid "Save"
+msgstr "Simpan"
+
+msgid "Cancel"
+msgstr "Batal"
+
+msgid "Services & counters"
+msgstr "Perkhidmatan & kaunter"
+
+msgid "Services"
+msgstr "Perkhidmatan"
+
+msgid "New service"
+msgstr "Perkhidmatan baharu"
+
+msgid "Prefix"
+msgstr "Awalan"
+
+msgid "Name"
+msgstr "Nama"
+
+msgid "Avg. minutes"
+msgstr "Purata minit"
+
+msgid "Active"
+msgstr "Aktif"
+
+msgid "Edit"
+msgstr "Sunting"
+
+msgid "No services yet."
+msgstr "Belum ada perkhidmatan."
+
+msgid "Counters"
+msgstr "Kaunter"
+
+msgid "New counter"
+msgstr "Kaunter baharu"
+
+msgid "No counters yet."
+msgstr "Belum ada kaunter."
+
+msgid "Current ticket"
+msgstr "Tiket semasa"
+
+msgid "Priority"
+msgstr "Keutamaan"
+
+msgid "Start serving"
+msgstr "Mula layan"
+
+msgid "Call again"
+msgstr "Panggil semula"
+
+msgid "No show"
+msgstr "Tidak hadir"
+
+msgid "Done"
+msgstr "Selesai"
+
+msgid "No ticket at this counter."
+msgstr "Tiada tiket di kaunter ini."
+
+msgid "Call next"
+msgstr "Panggil seterusnya"
+
+msgid "Nobody is waiting."
+msgstr "Tiada sesiapa menunggu."
+
+msgid "Add walk-in"
+msgstr "Tambah pelanggan walk-in"
+
+msgid "Service"
+msgstr "Perkhidmatan"
+
+msgid "Add ticket"
+msgstr "Tambah tiket"
+
+msgid "Staff"
+msgstr "Kakitangan"
+
+msgid "Staff dashboard"
+msgstr "Papan pemuka kakitangan"
+
+msgid "Manager"
+msgstr "Pengurus"
+
+msgid "Counter staff"
+msgstr "Kakitangan kaunter"
+
+msgid "Ticket history"
+msgstr "Sejarah tiket"
+
+msgid "Join page"
+msgstr "Halaman sertai"
+
+msgid "You are not assigned to any branch yet. Ask a manager."
+msgstr "Anda belum ditugaskan ke mana-mana cawangan. Sila hubungi pengurus."
+
+#, python-format
+msgid "%(n)s waiting today"
+msgstr "%(n)s menunggu hari ini"
+
+msgid "Filter"
+msgstr "Tapis"
+
+msgid "Reset"
+msgstr "Set semula"
+
+msgid "Ticket"
+msgstr "Tiket"
+
+msgid "Day"
+msgstr "Hari"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Counter"
+msgstr "Kaunter"
+
+msgid "Nickname"
+msgstr "Nama panggilan"
+
+msgid "Created"
+msgstr "Dicipta"
+
+msgid "No tickets match."
+msgstr "Tiada tiket yang sepadan."
+
+msgid "Pages"
+msgstr "Halaman"
+
+msgid "Previous"
+msgstr "Sebelumnya"
+
+#, python-format
+msgid "Tickets found: %(n)s"
+msgstr "Tiket ditemui: %(n)s"
+
+#, python-format
+msgid "Page %(n)s of %(total)s"
+msgstr "Halaman %(n)s daripada %(total)s"
+
+msgid "~{n} min"
+msgstr "~{n} minit"
+
+msgid "You are next"
+msgstr "Anda seterusnya"
+
+msgid "Your number"
+msgstr "Nombor anda"
+
+msgid "Please go to"
+msgstr "Sila ke"
+
+msgid "People ahead"
+msgstr "Orang di hadapan"
+
+msgid "Estimated wait"
+msgstr "Anggaran masa menunggu"
+
+msgid "This page updates by itself. Keep it open or bookmark it."
+msgstr "Halaman ini dikemas kini sendiri. Biarkan ia terbuka atau tandakan halaman ini."
+
+msgid "Cancel my ticket"
+msgstr "Batalkan tiket saya"
+
+msgid "Skip to content"
+msgstr "Langkau ke kandungan"
+
+msgid "Main"
+msgstr "Utama"
+
+msgid "Log out"
+msgstr "Log keluar"
+
+msgid "Staff login"
+msgstr "Log masuk kakitangan"
+
+msgid "Language"
+msgstr "Bahasa"
+
+msgid "Go"
+msgstr "Pergi"
+
+msgid "Demo system with synthetic data."
+msgstr "Sistem demo dengan data sintetik."
+
+msgid "Wrong username or password."
+msgstr "Nama pengguna atau kata laluan salah."
+
+msgid "Username"
+msgstr "Nama pengguna"
+
+msgid "Password"
+msgstr "Kata laluan"
+
+msgid "Log in"
+msgstr "Log masuk"
+
+msgid "This service is not taking tickets right now."
+msgstr "Perkhidmatan ini tidak menerima tiket sekarang."
+
+msgid "This branch is not taking new tickets right now."
+msgstr "Cawangan ini tidak menerima tiket baharu sekarang."
+
+msgid "This counter is not active."
+msgstr "Kaunter ini tidak aktif."
+
+msgid "Finish or mark the current ticket as no-show first."
+msgstr "Selesaikan atau tandakan tiket semasa sebagai tidak hadir dahulu."
+
+msgid "Unknown action."
+msgstr "Tindakan tidak dikenali."
+
+#, python-format
+msgid "Ticket %(code)s is %(status)s; cannot %(action)s."
+msgstr "Tiket %(code)s berstatus %(status)s; tidak boleh %(action)s."
+
+msgid "What do you need?"
+msgstr "Apakah yang anda perlukan?"
+
+msgid "Nickname (optional)"
+msgstr "Nama panggilan (pilihan)"
+
+msgid "Shown only to staff. Please do not enter your IC number."
+msgstr "Hanya dipaparkan kepada kakitangan. Jangan masukkan nombor IC anda."
+
+msgid "Priority (elderly, disabled, pregnant, urgent)"
+msgstr "Keutamaan (warga emas, OKU, hamil, kecemasan)"
+
+msgid "Another service already uses this prefix."
+msgstr "Perkhidmatan lain sudah menggunakan awalan ini."
+
+msgid "Another service already has this name."
+msgstr "Perkhidmatan lain sudah menggunakan nama ini."
+
+msgid "Another counter already has this name."
+msgstr "Kaunter lain sudah menggunakan nama ini."
+
+msgid "Search"
+msgstr "Cari"
+
+msgid "All statuses"
+msgstr "Semua status"
+
+msgid "All services"
+msgstr "Semua perkhidmatan"
+
+msgid "name"
+msgstr "nama"
+
+msgid "slug"
+msgstr "slug"
+
+msgid "open for new tickets"
+msgstr "terima tiket baharu"
+
+msgid "When off, customers cannot take new tickets from their phone."
+msgstr "Jika dimatikan, pelanggan tidak boleh mengambil tiket baharu dari telefon."
+
+msgid "branch"
+msgstr "cawangan"
+
+msgid "branches"
+msgstr "cawangan"
+
+msgid "role"
+msgstr "peranan"
+
+msgid "membership"
+msgstr "keahlian"
+
+msgid "memberships"
+msgstr "keahlian"
+
+msgid "Use 1 to 3 capital letters, e.g. A or RX."
+msgstr "Gunakan 1 hingga 3 huruf besar, cth. A atau RX."
+
+msgid "ticket prefix"
+msgstr "awalan tiket"
+
+msgid "Letters printed before the ticket number, e.g. A for A-007."
+msgstr "Huruf yang dicetak sebelum nombor tiket, cth. A untuk A-007."
+
+msgid "average minutes per customer"
+msgstr "purata minit setiap pelanggan"
+
+msgid "active"
+msgstr "aktif"
+
+msgid "service"
+msgstr "perkhidmatan"
+
+msgid "services"
+msgstr "perkhidmatan"
+
+msgid "counter"
+msgstr "kaunter"
+
+msgid "counters"
+msgstr "kaunter"
+
+msgid "Called"
+msgstr "Dipanggil"
+
+msgid "Being served"
+msgstr "Sedang dilayan"
+
+msgid "Cancelled"
+msgstr "Dibatalkan"
+
+msgid "Phone (QR)"
+msgstr "Telefon (QR)"
+
+msgid "Front desk"
+msgstr "Kaunter hadapan"
+
+msgid "day"
+msgstr "hari"
+
+msgid "number"
+msgstr "nombor"
+
+msgid "ticket"
+msgstr "tiket"
+
+msgid "nickname"
+msgstr "nama panggilan"
+
+msgid "priority"
+msgstr "keutamaan"
+
+msgid "Elderly, disabled, pregnant or urgent: called before normal tickets."
+msgstr "Warga emas, OKU, hamil atau kecemasan: dipanggil sebelum tiket biasa."
+
+msgid "status"
+msgstr "status"
+
+msgid "created"
+msgstr "dicipta"
+
+msgid "tickets"
+msgstr "tiket"
+
+msgid "Saved."
+msgstr "Disimpan."
+
+msgid "Edit service"
+msgstr "Sunting perkhidmatan"
+
+msgid "Edit counter"
+msgstr "Sunting kaunter"
+
+msgid "This ticket can no longer be cancelled."
+msgstr "Tiket ini tidak boleh dibatalkan lagi."
+
+msgid "Your ticket was cancelled."
+msgstr "Tiket anda telah dibatalkan."
+
+#, python-format
+msgid "Called %(code)s."
+msgstr "%(code)s dipanggil."
+
+#, python-format
+msgid "Ticket %(code)s added."
+msgstr "Tiket %(code)s ditambah."
+
+msgid "Choose a service for the walk-in."
+msgstr "Pilih perkhidmatan untuk pelanggan walk-in."

@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Queues" %}{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>{% translate "Wait anywhere. We will call your turn." %}</h1>
+  <p class="lead">{% translate "Take a queue number from your phone, see how many people are ahead of you, and come back when it is almost your turn." %}</p>
+</section>
+<section>
+  <h2>{% translate "Branches" %}</h2>
+  {% if branches %}
+  <ul class="grid">
+    {% for b in branches %}
+    <li class="card">
+      <h3>{{ b.name }}</h3>
+      {% if b.is_open %}<p class="badge ok">{% translate "Open" %}</p>{% else %}<p class="badge muted">{% translate "Closed for new tickets" %}</p>{% endif %}
+      <p class="actions">
+        <a class="btn btn-primary" href="{% url 'join' b.slug %}">{% translate "Take a number" %}</a>
+        <a class="btn" href="{% url 'board' b.slug %}">{% translate "Display board" %}</a>
+      </p>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">{% translate "No branches yet. Run the seed command to add demo data." %}</p>
+  {% endif %}
+</section>
+{% endblock %}

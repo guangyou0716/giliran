@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Staff" %}{% endblock %}
+{% block content %}
+<h1>{% translate "Staff dashboard" %}</h1>
+{% for row in rows %}
+<section class="card">
+  <div class="card-head">
+    <h2>{{ row.branch.name }}</h2>
+    <span class="badge">{% if row.role == MANAGER %}{% translate "Manager" %}{% else %}{% translate "Counter staff" %}{% endif %}</span>
+  </div>
+  <p class="muted">{% blocktranslate with n=row.board.waiting_total %}{{ n }} waiting today{% endblocktranslate %}</p>
+  <h3>{% translate "Counters" %}</h3>
+  <ul class="grid compact">
+    {% for c in row.branch.counters.all %}
+      <li class="card inner{% if not c.is_active %} inactive{% endif %}">
+        <a href="{% url 'staff:counter' c.pk %}" class="stretched">{{ c.name }}</a>
+        <p class="muted small">{% for s in c.services.all %}{{ s.prefix }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+      </li>
+    {% empty %}
+      <li class="empty">{% translate "No counters yet." %}</li>
+    {% endfor %}
+  </ul>
+  <p class="actions">
+    <a class="btn" href="{% url 'staff:history' row.branch.slug %}">{% translate "Ticket history" %}</a>
+    <a class="btn" href="{% url 'board' row.branch.slug %}">{% translate "Display board" %}</a>
+    <a class="btn" href="{% url 'join' row.branch.slug %}">{% translate "Join page" %}</a>
+    {% if row.role == MANAGER %}<a class="btn" href="{% url 'manage:settings' row.branch.slug %}">{% translate "Services & counters" %}</a>{% endif %}
+  </p>
+</section>
+{% empty %}
+<p class="empty">{% translate "You are not assigned to any branch yet. Ask a manager." %}</p>
+{% endfor %}
+{% endblock %}

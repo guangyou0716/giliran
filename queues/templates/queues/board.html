@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Now serving" %} · {{ branch.name }}{% endblock %}
+{% block body_class %}board-body{% endblock %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block main_class %}board{% endblock %}
+{% block content %}
+<div id="board" data-poll-url="{% url 'api:board' branch.slug %}" data-poll-ms="{{ poll_ms }}">
+  <header class="board-head">
+    <h1>{{ branch.name }}</h1>
+    <p>{% translate "Scan the QR code at the entrance to take a number" %} · <span class="board-url">{{ request.scheme }}://{{ request.get_host }}{% url 'join' branch.slug %}</span></p>
+  </header>
+  <div class="board-grid">
+    <section class="board-serving" aria-live="polite">
+      <h2>{% translate "Now serving" %}</h2>
+      <ol data-list="serving">
+        {% for s in data.serving %}
+          <li><span class="code">{{ s.code }}</span><span class="arrow" aria-hidden="true">→</span><span class="counter">{{ s.counter }}</span></li>
+        {% empty %}
+          <li class="empty">—</li>
+        {% endfor %}
+      </ol>
+    </section>
+    <section class="board-next">
+      <h2>{% translate "Next" %}</h2>
+      <ol data-list="next">
+        {% for code in data.next %}<li>{{ code }}</li>{% empty %}<li class="empty">—</li>{% endfor %}
+      </ol>
+      <h2>{% translate "Waiting" %}</h2>
+      <ul data-list="services" class="board-services">
+        {% for s in data.services %}<li><span>{{ s.prefix }} · {{ s.name }}</span><strong>{{ s.waiting }}</strong></li>{% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

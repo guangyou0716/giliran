@@ -1,0 +1,434 @@
+# giliran UI translations.
+# This file is distributed under the same license as the giliran package.
+msgid ""
+msgstr ""
+"Project-Id-Version: giliran 0.1\n"
+"Language: zh_Hans\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Now serving"
+msgstr "正在服务"
+
+msgid "Scan the QR code at the entrance to take a number"
+msgstr "扫描入口处的二维码即可取号"
+
+msgid "Next"
+msgstr "下一位"
+
+msgid "Waiting"
+msgstr "等候中"
+
+msgid "Queues"
+msgstr "排队"
+
+msgid "Wait anywhere. We will call your turn."
+msgstr "随处等候，轮到您时我们会叫号。"
+
+msgid "Take a queue number from your phone, see how many people are ahead of you, and come back when it is almost your turn."
+msgstr "用手机取号，查看前面还有多少人，快轮到您时再回来。"
+
+msgid "Branches"
+msgstr "分店"
+
+msgid "Open"
+msgstr "营业中"
+
+msgid "Closed for new tickets"
+msgstr "暂停取号"
+
+msgid "Take a number"
+msgstr "取号"
+
+msgid "Display board"
+msgstr "叫号屏"
+
+msgid "No branches yet. Run the seed command to add demo data."
+msgstr "还没有分店。运行 seed 命令添加演示数据。"
+
+msgid "This branch is not taking new tickets right now. Please ask at the front desk."
+msgstr "本店目前暂停取号，请到前台询问。"
+
+msgid "No services are open right now."
+msgstr "目前没有开放的服务。"
+
+msgid "Get my ticket"
+msgstr "领取号码"
+
+#, python-format
+msgid "%(n)s waiting"
+msgstr "%(n)s 人等候"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Services & counters"
+msgstr "服务与柜台"
+
+msgid "Services"
+msgstr "服务"
+
+msgid "New service"
+msgstr "新增服务"
+
+msgid "Prefix"
+msgstr "前缀"
+
+msgid "Name"
+msgstr "名称"
+
+msgid "Avg. minutes"
+msgstr "平均分钟"
+
+msgid "Active"
+msgstr "启用"
+
+msgid "Edit"
+msgstr "编辑"
+
+msgid "No services yet."
+msgstr "还没有服务。"
+
+msgid "Counters"
+msgstr "柜台"
+
+msgid "New counter"
+msgstr "新增柜台"
+
+msgid "No counters yet."
+msgstr "还没有柜台。"
+
+msgid "Current ticket"
+msgstr "当前号码"
+
+msgid "Priority"
+msgstr "优先"
+
+msgid "Start serving"
+msgstr "开始服务"
+
+msgid "Call again"
+msgstr "再次叫号"
+
+msgid "No show"
+msgstr "过号"
+
+msgid "Done"
+msgstr "完成"
+
+msgid "No ticket at this counter."
+msgstr "此柜台没有号码。"
+
+msgid "Call next"
+msgstr "叫下一位"
+
+msgid "Nobody is waiting."
+msgstr "没有人在等候。"
+
+msgid "Add walk-in"
+msgstr "现场登记"
+
+msgid "Service"
+msgstr "服务"
+
+msgid "Add ticket"
+msgstr "添加号码"
+
+msgid "Staff"
+msgstr "员工"
+
+msgid "Staff dashboard"
+msgstr "员工面板"
+
+msgid "Manager"
+msgstr "经理"
+
+msgid "Counter staff"
+msgstr "柜台员工"
+
+msgid "Ticket history"
+msgstr "号码记录"
+
+msgid "Join page"
+msgstr "取号页面"
+
+msgid "You are not assigned to any branch yet. Ask a manager."
+msgstr "您尚未被分配到任何分店，请联系经理。"
+
+#, python-format
+msgid "%(n)s waiting today"
+msgstr "今天 %(n)s 人等候"
+
+msgid "Filter"
+msgstr "筛选"
+
+msgid "Reset"
+msgstr "重置"
+
+msgid "Ticket"
+msgstr "号码"
+
+msgid "Day"
+msgstr "日期"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Counter"
+msgstr "柜台"
+
+msgid "Nickname"
+msgstr "昵称"
+
+msgid "Created"
+msgstr "创建时间"
+
+msgid "No tickets match."
+msgstr "没有符合条件的号码。"
+
+msgid "Pages"
+msgstr "分页"
+
+msgid "Previous"
+msgstr "上一页"
+
+#, python-format
+msgid "Tickets found: %(n)s"
+msgstr "找到 %(n)s 个号码"
+
+#, python-format
+msgid "Page %(n)s of %(total)s"
+msgstr "第 %(n)s 页，共 %(total)s 页"
+
+msgid "~{n} min"
+msgstr "约 {n} 分钟"
+
+msgid "You are next"
+msgstr "下一位就是您"
+
+msgid "Your number"
+msgstr "您的号码"
+
+msgid "Please go to"
+msgstr "请前往"
+
+msgid "People ahead"
+msgstr "前面人数"
+
+msgid "Estimated wait"
+msgstr "预计等候"
+
+msgid "This page updates by itself. Keep it open or bookmark it."
+msgstr "本页面会自动更新，请保持打开或加入书签。"
+
+msgid "Cancel my ticket"
+msgstr "取消我的号码"
+
+msgid "Skip to content"
+msgstr "跳到内容"
+
+msgid "Main"
+msgstr "主导航"
+
+msgid "Log out"
+msgstr "退出登录"
+
+msgid "Staff login"
+msgstr "员工登录"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "Go"
+msgstr "确定"
+
+msgid "Demo system with synthetic data."
+msgstr "演示系统，使用虚构数据。"
+
+msgid "Wrong username or password."
+msgstr "用户名或密码错误。"
+
+msgid "Username"
+msgstr "用户名"
+
+msgid "Password"
+msgstr "密码"
+
+msgid "Log in"
+msgstr "登录"
+
+msgid "This service is not taking tickets right now."
+msgstr "此服务目前暂停取号。"
+
+msgid "This branch is not taking new tickets right now."
+msgstr "本店目前暂停取号。"
+
+msgid "This counter is not active."
+msgstr "此柜台未启用。"
+
+msgid "Finish or mark the current ticket as no-show first."
+msgstr "请先完成当前号码或标记为过号。"
+
+msgid "Unknown action."
+msgstr "未知操作。"
+
+#, python-format
+msgid "Ticket %(code)s is %(status)s; cannot %(action)s."
+msgstr "号码 %(code)s 状态为 %(status)s，无法执行 %(action)s。"
+
+msgid "What do you need?"
+msgstr "您需要什么服务？"
+
+msgid "Nickname (optional)"
+msgstr "昵称（可选）"
+
+msgid "Shown only to staff. Please do not enter your IC number."
+msgstr "仅员工可见。请勿填写身份证号码。"
+
+msgid "Priority (elderly, disabled, pregnant, urgent)"
+msgstr "优先（长者、残障人士、孕妇、紧急）"
+
+msgid "Another service already uses this prefix."
+msgstr "此前缀已被其他服务使用。"
+
+msgid "Another service already has this name."
+msgstr "已有同名服务。"
+
+msgid "Another counter already has this name."
+msgstr "已有同名柜台。"
+
+msgid "Search"
+msgstr "搜索"
+
+msgid "All statuses"
+msgstr "全部状态"
+
+msgid "All services"
+msgstr "全部服务"
+
+msgid "name"
+msgstr "名称"
+
+msgid "slug"
+msgstr "网址标识"
+
+msgid "open for new tickets"
+msgstr "开放取号"
+
+msgid "When off, customers cannot take new tickets from their phone."
+msgstr "关闭后，顾客无法用手机取号。"
+
+msgid "branch"
+msgstr "分店"
+
+msgid "branches"
+msgstr "分店"
+
+msgid "role"
+msgstr "角色"
+
+msgid "membership"
+msgstr "成员"
+
+msgid "memberships"
+msgstr "成员"
+
+msgid "Use 1 to 3 capital letters, e.g. A or RX."
+msgstr "请使用 1 至 3 个大写字母，例如 A 或 RX。"
+
+msgid "ticket prefix"
+msgstr "号码前缀"
+
+msgid "Letters printed before the ticket number, e.g. A for A-007."
+msgstr "号码前的字母，例如 A-007 中的 A。"
+
+msgid "average minutes per customer"
+msgstr "每位顾客平均分钟"
+
+msgid "active"
+msgstr "启用"
+
+msgid "service"
+msgstr "服务"
+
+msgid "services"
+msgstr "服务"
+
+msgid "counter"
+msgstr "柜台"
+
+msgid "counters"
+msgstr "柜台"
+
+msgid "Called"
+msgstr "已叫号"
+
+msgid "Being served"
+msgstr "服务中"
+
+msgid "Cancelled"
+msgstr "已取消"
+
+msgid "Phone (QR)"
+msgstr "手机（二维码）"
+
+msgid "Front desk"
+msgstr "前台"
+
+msgid "day"
+msgstr "日期"
+
+msgid "number"
+msgstr "号码"
+
+msgid "ticket"
+msgstr "号码"
+
+msgid "nickname"
+msgstr "昵称"
+
+msgid "priority"
+msgstr "优先"
+
+msgid "Elderly, disabled, pregnant or urgent: called before normal tickets."
+msgstr "长者、残障人士、孕妇或紧急情况：优先于普通号码叫号。"
+
+msgid "status"
+msgstr "状态"
+
+msgid "created"
+msgstr "创建时间"
+
+msgid "tickets"
+msgstr "号码"
+
+msgid "Saved."
+msgstr "已保存。"
+
+msgid "Edit service"
+msgstr "编辑服务"
+
+msgid "Edit counter"
+msgstr "编辑柜台"
+
+msgid "This ticket can no longer be cancelled."
+msgstr "此号码已无法取消。"
+
+msgid "Your ticket was cancelled."
+msgstr "您的号码已取消。"
+
+#, python-format
+msgid "Called %(code)s."
+msgstr "已叫号 %(code)s。"
+
+#, python-format
+msgid "Ticket %(code)s added."
+msgstr "已添加号码 %(code)s。"
+
+msgid "Choose a service for the walk-in."
+msgstr "请为现场顾客选择服务。"

@@ -1,0 +1,41 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Ticket history" %}{% endblock %}
+{% block content %}
+<p class="eyebrow"><a href="{% url 'staff:dashboard' %}">{{ branch.name }}</a></p>
+<h1>{% translate "Ticket history" %}</h1>
+<form method="get" class="filters" role="search">
+  <div><label for="{{ form.q.id_for_label }}">{{ form.q.label }}</label>{{ form.q }}</div>
+  <div><label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>{{ form.status }}</div>
+  <div><label for="{{ form.service.id_for_label }}">{{ form.service.label }}</label>{{ form.service }}</div>
+  <div><label for="{{ form.day.id_for_label }}">{{ form.day.label }}</label>{{ form.day }}</div>
+  <div class="filter-actions"><button type="submit" class="btn btn-primary">{% translate "Filter" %}</button> <a class="btn" href="{% url 'staff:history' branch.slug %}">{% translate "Reset" %}</a></div>
+</form>
+<p class="muted">{% blocktranslate with n=page.paginator.count %}Tickets found: {{ n }}{% endblocktranslate %}</p>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr>
+    <th scope="col">{% translate "Ticket" %}</th><th scope="col">{% translate "Day" %}</th><th scope="col">{% translate "Service" %}</th>
+    <th scope="col">{% translate "Status" %}</th><th scope="col">{% translate "Counter" %}</th><th scope="col">{% translate "Nickname" %}</th><th scope="col">{% translate "Created" %}</th>
+  </tr></thead>
+  <tbody>
+  {% for t in page %}
+    <tr>
+      <td><strong>{{ t.code }}</strong>{% if t.priority %} <span class="pill pill-priority">{% translate "Priority" %}</span>{% endif %}</td>
+      <td>{{ t.day|date:"Y-m-d" }}</td><td>{{ t.service.name }}</td>
+      <td><span class="pill status-{{ t.status }}">{{ t.get_status_display }}</span></td>
+      <td>{{ t.counter.name|default:"—" }}</td><td>{{ t.nickname|default:"—" }}</td><td>{{ t.created_at|time:"H:i" }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="7" class="empty">{% translate "No tickets match." %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if page.has_other_pages %}
+<nav class="pager" aria-label="{% translate 'Pages' %}">
+  {% if page.has_previous %}<a class="btn" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page.previous_page_number }}">{% translate "Previous" %}</a>{% endif %}
+  <span>{% blocktranslate with n=page.number total=page.paginator.num_pages %}Page {{ n }} of {{ total }}{% endblocktranslate %}</span>
+  {% if page.has_next %}<a class="btn" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page.next_page_number }}">{% translate "Next" %}</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

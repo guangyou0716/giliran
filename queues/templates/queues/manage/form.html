@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<p class="eyebrow"><a href="{% url 'manage:settings' branch.slug %}">{{ branch.name }}</a></p>
+<section class="card narrow">
+  <h1>{{ title }}</h1>
+  <form method="post" novalidate class="stacked">{% csrf_token %}
+    {% if form.non_field_errors %}<div class="error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+      <div class="field{% if field.errors %} has-error{% endif %}">
+        {% if field.field.widget.input_type == "checkbox" and not field.field.widget.allow_multiple_selected %}
+          <label class="check">{{ field }} {{ field.label }}</label>
+        {% else %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+        {% endif %}
+        {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
+        {% for e in field.errors %}<p class="error" role="alert">{{ e }}</p>{% endfor %}
+      </div>
+    {% endfor %}
+    <p class="actions"><button type="submit" class="btn btn-primary">{% translate "Save" %}</button> <a class="btn" href="{% url 'manage:settings' branch.slug %}">{% translate "Cancel" %}</a></p>
+  </form>
+</section>
+{% endblock %}
