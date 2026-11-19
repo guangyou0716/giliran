@@ -161,6 +161,9 @@ class Ticket(models.Model):
     recall_count = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(_("created"), default=timezone.now)
     called_at = models.DateTimeField(null=True, blank=True)
+    # When the ticket was first called; ``called_at`` moves on every recall, so waiting
+    # time (reports) is measured to this one.
+    first_called_at = models.DateTimeField(null=True, blank=True)
     serving_at = models.DateTimeField(null=True, blank=True)
     finished_at = models.DateTimeField(null=True, blank=True)
     appointment_at = models.DateTimeField(

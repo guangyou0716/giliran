@@ -734,3 +734,85 @@ msgstr "Slot tanpa tempahan"
 #. Django date format for a short day label, e.g. "Fri 20 Nov".
 msgid "D j M"
 msgstr "D, j M"
+
+# Reports (increment 3)
+
+#, python-format
+msgid "%(start)s to %(end)s (Malaysia time)"
+msgstr "%(start)s hingga %(end)s (waktu Malaysia)"
+
+msgid "Avg. service (min)"
+msgstr "Purata layanan (min)"
+
+msgid "Avg. wait (min)"
+msgstr "Purata menunggu (min)"
+
+msgid "Bookings cancelled"
+msgstr "Tempahan dibatalkan"
+
+msgid "By hour of day"
+msgstr "Mengikut jam"
+
+msgid "By service"
+msgstr "Mengikut perkhidmatan"
+
+#, python-format
+msgid "Choose at most %(days)d days."
+msgstr "Pilih paling banyak %(days)d hari."
+
+msgid "Days and hours are Malaysia time; tickets count in the hour they were taken, appointments in their slot hour."
+msgstr "Hari dan jam mengikut waktu Malaysia; tiket dikira pada jam ia diambil, temu janji pada jam slotnya."
+
+msgid "Download CSV"
+msgstr "Muat turun CSV"
+
+msgid "Hour"
+msgstr "Jam"
+
+msgid "How these numbers are counted"
+msgstr "Cara angka ini dikira"
+
+msgid "Left queue"
+msgstr "Keluar baris"
+
+msgid "Left queue: customers who cancelled their ticket. Bookings cancelled: appointments cancelled in advance."
+msgstr "Keluar baris: pelanggan yang membatalkan tiket. Tempahan dibatalkan: temu janji yang dibatalkan lebih awal."
+
+msgid "Median wait (min)"
+msgstr "Median menunggu (min)"
+
+msgid "No tickets in this period."
+msgstr "Tiada tiket dalam tempoh ini."
+
+msgid "No-show rate (%)"
+msgstr "Kadar tidak hadir (%)"
+
+msgid "No-shows"
+msgstr "Tidak hadir"
+
+msgid "No-shows: tickets marked no-show plus appointments nobody checked in for. Rate = no-shows / (tickets + missed appointments)."
+msgstr "Tidak hadir: tiket bertanda tidak hadir serta temu janji yang tiada daftar masuk. Kadar = tidak hadir / (tiket + temu janji terlepas)."
+
+msgid "Report filters"
+msgstr "Penapis laporan"
+
+msgid "Reports"
+msgstr "Laporan"
+
+msgid "Served"
+msgstr "Dilayan"
+
+msgid "Service time: from Start serving to Done."
+msgstr "Masa layanan: dari Mula layan hingga Selesai."
+
+msgid "The start date must be on or before the end date."
+msgstr "Tarikh mula mesti sama atau sebelum tarikh akhir."
+
+msgid "Tickets"
+msgstr "Tiket"
+
+msgid "To"
+msgstr "Hingga"
+
+msgid "Wait: from taking the ticket (or checking in for an appointment) to the first call."
+msgstr "Menunggu: dari mengambil tiket (atau daftar masuk temu janji) hingga panggilan pertama."

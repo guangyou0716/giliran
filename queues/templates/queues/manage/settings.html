@@ -4,7 +4,8 @@
 <p class="eyebrow"><a href="{% url 'staff:dashboard' %}">{{ branch.name }}</a></p>
 <div class="card-head">
   <h1>{% translate "Services & counters" %}</h1>
-  <a class="btn" href="{% url 'manage:slots' branch.slug %}">{% translate "Appointment slots" %}</a>
+  <p class="btn-row"><a class="btn" href="{% url 'manage:slots' branch.slug %}">{% translate "Appointment slots" %}</a>
+  <a class="btn" href="{% url 'manage:reports' branch.slug %}">{% translate "Reports" %}</a></p>
 </div>
 <section class="card">
   <div class="card-head"><h2>{% translate "Services" %}</h2><a class="btn btn-primary" href="{% url 'manage:service_create' branch.slug %}">{% translate "New service" %}</a></div>

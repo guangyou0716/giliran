@@ -21,6 +21,8 @@ which number goes to which room.
 |---|---|---|
 | ![Booking page with free time slots](docs/screenshots/book-phone.png) | ![Booking page with reference and check-in button](docs/screenshots/booking-phone.png) | ![Staff appointments list with check-in buttons](docs/screenshots/appointments-staff.png) |
 
+![Manager reports: totals, per service table and per hour bar table](docs/screenshots/reports.png)
+
 Screenshots are taken by the Playwright end-to-end test from a local run on synthetic seed data
 (`GILIRAN_SCREENSHOTS=docs/screenshots pytest -m e2e`).
 
@@ -42,6 +44,10 @@ Screenshots are taken by the Playwright end-to-end test from a local run on synt
 - **Slot management** for managers: generate slots for a service and day (from / until / minutes per slot / seats),
   change seats (never below what is booked) or close a slot, delete slots without bookings.
 - **Ticket history** with search (ticket code / nickname), filters (status, service, day) and pagination.
+- **Reports** for managers (`/manage/b/<branch>/reports/`): for a date range (up to 92 days, Malaysia time) and
+  optionally one service: tickets, served, average and median wait, average service time, no-shows and no-show
+  rate, customers who left the queue and bookings cancelled; one table per service and a bar table per hour of
+  day; **CSV export** (see [Reports](#reports)).
 - **Manager pages**: create / edit services (prefix, average minutes, active) and counters (which services each serves).
 - **Roles per branch**: `manager` and `staff` memberships; Django superuser = manager everywhere. Staff of one
   branch cannot see or act on another branch.
@@ -87,6 +93,27 @@ Appointments:
 The locking rules have concurrency tests that run real threads against PostgreSQL in CI (parallel joins,
 parallel "Call next", 10 people booking 3 seats at once, cancels racing new bookings).
 
+## Reports
+
+All days and hours are Malaysia time. A ticket counts on the day and hour it was taken (check-in time for
+appointments); a booking counts on its slot's day and hour.
+
+| Number | Definition |
+|---|---|
+| Wait | first call - ticket taken (or checked in). `Ticket.first_called_at` is set once, so "Call again" does not reset it |
+| Service time | Done - Start serving, for tickets that were started |
+| No-shows | tickets marked no-show + bookings never checked in (no-show, or still "booked" after start + grace) |
+| No-show rate | no-shows / (tickets + missed bookings) |
+| Left queue / bookings cancelled | tickets the customer cancelled / bookings cancelled in advance (seat freed) |
+
+The page runs a fixed number of queries whatever the range or number of services: one grouped aggregate over
+tickets (per service x hour: counts, summed waits and service times), one list of waits for the medians and one
+grouped aggregate over bookings; totals are rolled up in Python (a test pins the query count). The CSV
+(`?format=csv`) follows RFC 4180 (CRLF, quoted fields), starts with a UTF-8 BOM so Excel shows Malay and Chinese
+names correctly, keeps English column names for scripts, and prefixes any text cell starting with `= + - @`,
+tab or CR with `'` so a spreadsheet never runs it as a formula. `seed_demo` writes 14 days of synthetic history
+(fixed random seed) so the page has data on a fresh install.
+
 ## Stack
 
 Python 3.12+ · Django 5.2 · PostgreSQL 16 (SQLite for quick local runs) · server-rendered templates + plain CSS
@@ -106,7 +133,8 @@ python manage.py runserver
 ```
 
 Open http://127.0.0.1:8000/ . The seed also creates half-hour appointment slots (09:00-17:00, 2 seats) for today
-and the next two days, plus a few bookings with clearly fake phone numbers (`000-000 01xx`).
+and the next two days, plus a few bookings with clearly fake phone numbers (`000-000 01xx`), and 14 days of finished tickets and past
+appointments for the reports.
 Appointment timing is configurable with `GILIRAN_BOOKING_GRACE_MIN` (10), `GILIRAN_CHECKIN_EARLY_MIN` (30) and
 `GILIRAN_BOOKING_DAYS` (7); run `python manage.py expire_bookings` every few minutes from cron to mark no-shows. Demo accounts (all synthetic, password = `GILIRAN_DEMO_PASSWORD`):
 
@@ -125,9 +153,10 @@ to check that every string is translated and the `.mo` files are current.
 ```bash
 ruff check . && ruff format --check .
 python scripts/messages.py               # translations complete and compiled
-pytest -m "not e2e"                      # unit + integration (engine, views, API, i18n, seed, concurrency)
+pytest -m "not e2e"                      # unit + integration (engine, views, API, reports, i18n, seed, concurrency)
 python -m playwright install chromium
-pytest -m e2e                            # browser: join -> call -> board -> history; book -> check in -> call
+pytest -m e2e                            # browser: join -> call -> board -> history; book -> check in -> call;
+                                         # manager reports -> filter -> CSV download
 ```
 
 Set `DATABASE_URL` to a PostgreSQL database to also run the concurrency tests (they are skipped on SQLite).
@@ -135,7 +164,7 @@ Set `DATABASE_URL` to a PostgreSQL database to also run the concurrency tests (t
 ## Roadmap
 
 1. ~~Appointments~~ (done): slots with capacity, booking link, check-in into the queue, no-shows.
-2. Reports: waits, service time and no-show rate per service / hour, CSV export.
+2. ~~Reports~~ (done): waits, service time and no-show rate per service / hour, CSV export.
 3. Server-Sent Events instead of polling; "almost your turn" notification and chime.
 4. Docker Compose (web + PostgreSQL), transfer a ticket between services, counter pause, axe accessibility audit.
 

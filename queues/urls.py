@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from .views import api, appointments, manage, public, staff
+from .views import api, appointments, manage, public, reports, staff
 
 staff_patterns = (
     [
@@ -26,6 +26,7 @@ manage_patterns = (
         path("b/<slug:slug>/slots/new/", appointments.slot_generate, name="slot_generate"),
         path("b/<slug:slug>/slots/<int:pk>/", appointments.slot_edit, name="slot_edit"),
         path("b/<slug:slug>/slots/<int:pk>/delete/", appointments.slot_delete, name="slot_delete"),
+        path("b/<slug:slug>/reports/", reports.reports, name="reports"),
     ],
     "manage",
 )

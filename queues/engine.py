@@ -215,7 +215,8 @@ def call_next(counter: Counter, *, actor=None, now: datetime | None = None) -> T
         ticket.status = S.CALLED
         ticket.counter = counter
         ticket.called_at = now
-        ticket.save(update_fields=["status", "counter", "called_at"])
+        ticket.first_called_at = now
+        ticket.save(update_fields=["status", "counter", "called_at", "first_called_at"])
         _log(ticket, "call", S.WAITING, actor, counter, now)
         return ticket
 

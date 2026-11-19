@@ -18,8 +18,11 @@ def test_seed_demo_is_idempotent():
         Slot.objects.count(),
         Booking.objects.count(),
     )
-    # 16 half-hour slots (09:00-17:00) x 3 days x 2 branches; 4 bookings x 2 days x 2 branches.
-    assert counts == (2, 5, 5, 5, 24, 96, 16)
+    # Today: 12 tickets x 2 branches; 16 half-hour slots (09:00-17:00) x 3 days x 2 branches;
+    # 4 bookings x 2 days x 2 branches. History (fixed random seed): 594 tickets; per past
+    # day and branch 3 slots with one booking each (checked in, no-show, cancelled):
+    # 14 x 3 x 2 = 84 slots and 84 bookings.
+    assert counts == (2, 5, 5, 5, 24 + 594, 96 + 84, 16 + 84)
     call_command("seed_demo", password="seed-pass-123", verbosity=0)
     assert (
         Branch.objects.count(),
@@ -80,7 +83,11 @@ def test_seed_just_after_midnight_stays_idempotent(monkeypatch):
     monkeypatch.setattr("django.utils.timezone.now", lambda: fixed)
     call_command("seed_demo", password="seed-pass-123", verbosity=0)
     call_command("seed_demo", password="seed-pass-123", verbosity=0)
-    assert Ticket.objects.count() == 24
-    assert set(Ticket.objects.values_list("day", flat=True)) == {fixed.date()}
-    assert max(Ticket.objects.values_list("created_at", flat=True)) <= fixed
-    assert min(Ticket.objects.values_list("created_at", flat=True)) >= fixed - timedelta(minutes=2)
+    # The 14 days of history end before 18:00 the previous day, so everything taken
+    # in the last hour is "today's" demo tickets.
+    recent = Ticket.objects.filter(created_at__gt=fixed - timedelta(hours=1))
+    assert recent.count() == 24 == Ticket.objects.filter(day=fixed.date()).count()
+    assert set(recent.values_list("day", flat=True)) == {fixed.date()}
+    assert max(recent.values_list("created_at", flat=True)) <= fixed
+    assert min(recent.values_list("created_at", flat=True)) >= fixed - timedelta(minutes=2)
+    assert Ticket.objects.count() == 24 + 594
