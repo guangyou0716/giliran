@@ -69,16 +69,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: requirements-dev.txt
-      # Ubuntu mirrors on the runners time out now and then; retry instead of failing the job.
-      - name: Install gettext (for compilemessages)
-        run: |
-          sudo apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 update
-          sudo apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 install -y --no-install-recommends gettext
       - run: pip install -r requirements-dev.txt
       - name: Select database
         if: matrix.database == 'postgres'
         run: echo "DATABASE_URL=postgres://giliran:giliran@localhost:5432/giliran" >> "$GITHUB_ENV"
-      - run: python manage.py compilemessages --ignore=.venv
+      # Valid .po files and committed .mo files up to date (Babel; no apt / GNU gettext needed).
+      - run: python scripts/messages.py
       - run: python manage.py check
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py migrate --noinput

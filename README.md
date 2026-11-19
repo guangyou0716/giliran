@@ -84,12 +84,14 @@ Open http://127.0.0.1:8000/ . Demo accounts (all synthetic, password = `GILIRAN_
 | `manager2` / `staff3` | manager / counter staff at *Demo Service Centre Cempaka* |
 
 Translations: `.po` files live in `locale/`; compiled `.mo` files are committed so the app runs without GNU gettext.
-After editing a `.po` file run `python manage.py compilemessages` (needs gettext).
+After editing a `.po` file run `python scripts/messages.py --write` (Babel); CI runs `python scripts/messages.py`
+to check that every string is translated and the `.mo` files are current.
 
 ## Tests
 
 ```bash
 ruff check . && ruff format --check .
+python scripts/messages.py               # translations complete and compiled
 pytest -m "not e2e"                      # unit + integration (engine, views, API, i18n, seed, concurrency)
 python -m playwright install chromium
 pytest -m e2e                            # browser: join -> call -> live update -> board -> history
