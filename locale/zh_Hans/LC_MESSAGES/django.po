@@ -434,3 +434,303 @@ msgstr "已添加号码 %(code)s。"
 
 msgid "Choose a service for the walk-in."
 msgstr "请为现场顾客选择服务。"
+
+# Appointments (increment 2)
+
+#, python-format
+msgid "%(created)s slots created, %(skipped)s already existed."
+msgstr "已创建 %(created)s 个时段，%(skipped)s 个已存在。"
+
+#, python-format
+msgid "%(n)s / %(total)s booked"
+msgstr "已预约 %(n)s / %(total)s"
+
+#, python-format
+msgid "%(n)s left"
+msgstr "剩 %(n)s 位"
+
+#, python-format
+msgid "%(n)s seats are already booked; capacity cannot be lower."
+msgstr "已有 %(n)s 个名额被预约，容量不能更低。"
+
+#, python-format
+msgid "%(ref)s checked in: ticket %(code)s."
+msgstr "%(ref)s 已报到：号码 %(code)s。"
+
+#, python-format
+msgid "About %(n)s min"
+msgstr "约 %(n)s 分钟"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Add slots"
+msgstr "添加时段"
+
+msgid "Appointment"
+msgstr "预约"
+
+msgid "Appointment slots"
+msgstr "预约时段"
+
+msgid "Appointments"
+msgstr "预约"
+
+msgid "Book an appointment"
+msgstr "预约时间"
+
+msgid "Book this time"
+msgstr "预约这个时间"
+
+msgid "Booked"
+msgstr "已预约"
+
+#, python-format
+msgid "Booked %(time)s"
+msgstr "预约 %(time)s"
+
+msgid "Booked (late)"
+msgstr "预约（迟到）"
+
+msgid "Booked. Keep this page: it is your booking link."
+msgstr "预约成功。请保留此页面：这是您的预约链接。"
+
+msgid "Bookings can only be checked in on the day of the appointment."
+msgstr "只能在预约当天报到。"
+
+#, python-format
+msgid "Bookings not checked in within %(grace)s minutes of their time become no-shows. Staff can still check them in today; they then queue like walk-ins."
+msgstr "在预约时间后 %(grace)s 分钟内未报到的预约将记为爽约。工作人员今天仍可为其报到，但会像现场顾客一样排队。"
+
+msgid "Bookmark this page: it is the only way to manage your booking."
+msgstr "请收藏此页面：这是管理预约的唯一方式。"
+
+msgid "Cancel my booking"
+msgstr "取消我的预约"
+
+msgid "Check in"
+msgstr "报到"
+
+#, python-format
+msgid "Check in %(ref)s"
+msgstr "为 %(ref)s 报到"
+
+#, python-format
+msgid "Check-in opens at %(time)s."
+msgstr "报到将于 %(time)s 开放。"
+
+msgid "Check-in time passed"
+msgstr "已过报到时间"
+
+msgid "Checked in"
+msgstr "已报到"
+
+msgid "Choose a service and a day first."
+msgstr "请先选择服务和日期。"
+
+msgid "Choose a time"
+msgstr "选择时间"
+
+msgid "Choose today or a later day."
+msgstr "请选择今天或之后的日期。"
+
+msgid "Could not create the booking. Please try again."
+msgstr "无法创建预约，请重试。"
+
+msgid "Create slots"
+msgstr "创建时段"
+
+msgid "Delete slot"
+msgstr "删除时段"
+
+msgid "Edit slot"
+msgstr "编辑时段"
+
+#, python-format
+msgid "Edit slot %(prefix)s %(time)s"
+msgstr "编辑时段 %(prefix)s %(time)s"
+
+msgid "Enter a phone number with 9 to 15 digits, e.g. 01X-XXX XXXX."
+msgstr "请输入 9 至 15 位数字的电话号码，例如 01X-XXX XXXX。"
+
+msgid "From"
+msgstr "从"
+
+msgid "How many people can book this time."
+msgstr "此时间可预约的人数。"
+
+msgid "I have arrived: check in"
+msgstr "我已到达：报到"
+
+msgid "Leave room for walk-ins: booked customers are called first at their time."
+msgstr "请为现场顾客留出名额：预约顾客到点后会优先叫号。"
+
+msgid "Minutes per slot"
+msgstr "每个时段分钟数"
+
+msgid "No appointment slots on this day."
+msgstr "当天没有预约时段。"
+
+msgid "No bookings match."
+msgstr "没有匹配的预约。"
+
+msgid "No bookings yet."
+msgstr "暂无预约。"
+
+msgid "No free times on this day. Try another day, or take a walk-in number."
+msgstr "当天没有空闲时间。请尝试其他日期，或现场取号。"
+
+#, python-format
+msgid "Open my queue number %(code)s"
+msgstr "打开我的排队号码 %(code)s"
+
+msgid "Phone"
+msgstr "电话"
+
+msgid "Phone number"
+msgstr "电话号码"
+
+msgid "Pick a time, then check in when you arrive. Booked customers are called first at their time."
+msgstr "选择时间，到达后报到。预约顾客到点后会优先叫号。"
+
+msgid "Prefer a fixed time?"
+msgstr "想要固定时间？"
+
+msgid "Reference"
+msgstr "预约编号"
+
+msgid "Reference, nickname or last 4 digits"
+msgstr "预约编号、昵称或电话后 4 位"
+
+msgid "Seats per slot"
+msgstr "每个时段名额"
+
+#, python-format
+msgid "Seats taken: %(n)s"
+msgstr "已占名额：%(n)s"
+
+msgid "Show"
+msgstr "显示"
+
+msgid "Show times"
+msgstr "显示时间"
+
+msgid "Slot deleted."
+msgstr "时段已删除。"
+
+#, python-format
+msgid "Slots on %(day)s"
+msgstr "%(day)s 的时段"
+
+msgid "Slots with bookings cannot be deleted; untick “open for booking” instead."
+msgstr "有预约的时段不能删除，请取消勾选“开放预约”。"
+
+msgid "So staff can greet you. Please do not enter your IC number."
+msgstr "方便工作人员称呼您。请勿输入身份证号码。"
+
+msgid "Sorry, this time was just fully booked. Please pick another."
+msgstr "抱歉，这个时间刚刚约满，请选择其他时间。"
+
+msgid "That time is no longer available."
+msgstr "该时间已不可预约。"
+
+msgid "That would create too many slots at once."
+msgstr "一次创建的时段太多。"
+
+msgid "The check-in time for this booking has passed. Please ask at the counter."
+msgstr "此预约的报到时间已过，请到柜台询问。"
+
+msgid "The end time must be after the start time."
+msgstr "结束时间必须晚于开始时间。"
+
+msgid "The time range is shorter than one slot."
+msgstr "时间范围短于一个时段。"
+
+msgid "This booking can no longer be cancelled."
+msgstr "此预约已无法取消。"
+
+msgid "This booking cannot be checked in."
+msgstr "此预约无法报到。"
+
+msgid "This phone number already has a booking at this time."
+msgstr "此电话号码在该时间已有预约。"
+
+msgid "This slot has bookings. Close it for booking instead of deleting it."
+msgstr "此时段已有预约。请关闭预约而不是删除。"
+
+msgid "This time has already passed."
+msgstr "这个时间已经过去。"
+
+msgid "This time is not open for booking."
+msgstr "这个时间不开放预约。"
+
+msgid "Today"
+msgstr "今天"
+
+msgid "Time"
+msgstr "时间"
+
+msgid "Until"
+msgstr "至"
+
+msgid "Used only for this booking. Staff screens show the last 4 digits."
+msgstr "仅用于此预约。工作人员界面只显示后 4 位。"
+
+msgid "You are checked in. This is your queue number."
+msgstr "您已报到。这是您的排队号码。"
+
+#, python-format
+msgid "You can check in here from %(time)s, or show the reference at the counter."
+msgstr "您可从 %(time)s 起在此报到，或在柜台出示预约编号。"
+
+msgid "Your booking"
+msgstr "您的预约"
+
+msgid "Your booking was cancelled."
+msgstr "您的预约已取消。"
+
+msgid "appointment slot"
+msgstr "预约时段"
+
+msgid "appointment slots"
+msgstr "预约时段"
+
+msgid "appointment time"
+msgstr "预约时间"
+
+msgid "booked"
+msgstr "已预约"
+
+msgid "booking"
+msgstr "预约"
+
+msgid "booking reference"
+msgstr "预约编号"
+
+msgid "bookings"
+msgstr "预约"
+
+msgid "capacity"
+msgstr "容量"
+
+msgid "ends at"
+msgstr "结束时间"
+
+msgid "open for booking"
+msgstr "开放预约"
+
+msgid "phone"
+msgstr "电话"
+
+msgid "slot"
+msgstr "时段"
+
+msgid "starts at"
+msgstr "开始时间"
+
+msgid "Slots without bookings"
+msgstr "暂无预约的时段"
+
+#. Django date format for a short day label, e.g. "Fri 20 Nov".
+msgid "D j M"
+msgstr "n月j日 D"

@@ -15,6 +15,7 @@
       {% if b.is_open %}<p class="badge ok">{% translate "Open" %}</p>{% else %}<p class="badge muted">{% translate "Closed for new tickets" %}</p>{% endif %}
       <p class="actions">
         <a class="btn btn-primary" href="{% url 'join' b.slug %}">{% translate "Take a number" %}</a>
+        <a class="btn" href="{% url 'book' b.slug %}">{% translate "Book an appointment" %}</a>
         <a class="btn" href="{% url 'board' b.slug %}">{% translate "Display board" %}</a>
       </p>
     </li>

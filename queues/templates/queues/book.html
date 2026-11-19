@@ -1,0 +1,70 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Book an appointment" %} · {{ branch.name }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <p class="eyebrow">{{ branch.name }}</p>
+  <h1>{% translate "Book an appointment" %}</h1>
+  <p class="help">{% translate "Pick a time, then check in when you arrive. Booked customers are called first at their time." %}</p>
+  {% if not search.fields.service.queryset.exists %}
+    <p class="notice">{% translate "No services are open right now." %}</p>
+  {% else %}
+  <form method="get" class="stacked" id="book-search">
+    <fieldset>
+      <legend>{{ search.service.label }}</legend>
+      {% if search.service.errors %}<p class="error" role="alert">{{ search.service.errors.0 }}</p>{% endif %}
+      <div class="choices">
+      {% for service in search.fields.service.queryset %}
+        <label class="choice">
+          <input type="radio" name="service" value="{{ service.pk }}" required{% if search.service.value|stringformat:"s" == service.pk|stringformat:"s" %} checked{% endif %}>
+          <span class="choice-body">
+            <span class="choice-prefix" aria-hidden="true">{{ service.prefix }}</span>
+            <span class="choice-name">{{ service.name }}</span>
+            <span class="choice-meta">{% blocktranslate with n=service.avg_minutes %}About {{ n }} min{% endblocktranslate %}</span>
+          </span>
+        </label>
+      {% endfor %}
+      </div>
+    </fieldset>
+    <label for="{{ search.day.id_for_label }}">{{ search.day.label }}</label>
+    {{ search.day }}
+    {% if search.day.errors %}<p class="error" role="alert">{{ search.day.errors.0 }}</p>{% endif %}
+    <button type="submit" class="btn btn-block">{% translate "Show times" %}</button>
+  </form>
+  {% endif %}
+</section>
+
+{% if form %}
+<section class="card narrow" aria-labelledby="times-heading">
+  <h2 id="times-heading">{% translate "Choose a time" %}</h2>
+  {% if form.slot.errors %}<p class="error" role="alert">{{ form.slot.errors.0 }}</p>{% endif %}
+  {% if not slots %}
+    <p class="empty">{% translate "No free times on this day. Try another day, or take a walk-in number." %}</p>
+    <p><a class="btn" href="{% url 'join' branch.slug %}">{% translate "Take a number" %}</a></p>
+  {% else %}
+  <form method="post" novalidate>{% csrf_token %}
+    <fieldset>
+      <legend class="sr-only">{{ form.slot.label }}</legend>
+      <div class="slot-grid">
+      {% for slot in slots %}
+        <label class="slot-choice">
+          <input type="radio" name="slot" value="{{ slot.pk }}" required{% if form.slot.value|stringformat:"s" == slot.pk|stringformat:"s" %} checked{% endif %}>
+          <span class="slot-body">
+            <span class="slot-time">{{ slot.starts_at|time:"H:i" }}</span>
+            <span class="slot-meta">{% blocktranslate with n=slot.seats_left %}{{ n }} left{% endblocktranslate %}</span>
+          </span>
+        </label>
+      {% endfor %}
+      </div>
+    </fieldset>
+    {% for field in form %}{% if field.name != "slot" %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
+      {% for e in field.errors %}<p class="error" role="alert">{{ e }}</p>{% endfor %}
+    {% endif %}{% endfor %}
+    <button type="submit" class="btn btn-primary btn-block">{% translate "Book this time" %}</button>
+  </form>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

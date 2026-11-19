@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Your booking" %} {{ b.ref }}{% endblock %}
+{% block content %}
+<section class="card narrow ticket booking status-{{ b.status }}">
+  <p class="eyebrow">{{ b.slot.service.branch.name }} · {{ b.slot.service.name }}</p>
+  <p class="ticket-label">{% translate "Your booking" %}</p>
+  {% translate "D j M" as day_format %}
+  <p class="booking-time" data-testid="booking-time">{{ b.slot.starts_at|date:day_format }} · {{ b.slot.starts_at|time:"H:i" }}</p>
+  <p class="ticket-status" role="status">
+    <span class="pill status-{{ b.status }}">{% if missed %}{% translate "Check-in time passed" %}{% else %}{{ b.get_status_display }}{% endif %}</span>
+  </p>
+  <dl class="stats">
+    <div><dt>{% translate "Reference" %}</dt><dd data-testid="booking-ref">{{ b.ref }}</dd></div>
+    <div><dt>{% translate "Nickname" %}</dt><dd class="small-dd">{{ b.nickname }}</dd></div>
+  </dl>
+  {% if b.status == "checked_in" and b.ticket %}
+    <p><a class="btn btn-primary btn-block" href="{% url 'ticket' b.ticket.token %}">{% blocktranslate with code=b.ticket.code %}Open my queue number {{ code }}{% endblocktranslate %}</a></p>
+  {% elif can_check_in %}
+    <form method="post" action="{% url 'booking_check_in' b.token %}">{% csrf_token %}
+      <button type="submit" class="btn btn-primary btn-block">{% translate "I have arrived: check in" %}</button>
+    </form>
+  {% elif check_in_later %}
+    <p class="notice">{% blocktranslate with time=check_in_opens|time:"H:i" %}You can check in here from {{ time }}, or show the reference at the counter.{% endblocktranslate %}</p>
+  {% elif missed %}
+    <p class="notice">{% translate "The check-in time for this booking has passed. Please ask at the counter." %}</p>
+  {% endif %}
+  <p class="help">{% translate "Bookmark this page: it is the only way to manage your booking." %}</p>
+  {% if can_cancel %}
+  <form method="post" action="{% url 'booking_cancel' b.token %}">{% csrf_token %}
+    <button type="submit" class="btn btn-danger-outline">{% translate "Cancel my booking" %}</button>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

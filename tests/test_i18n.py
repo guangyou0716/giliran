@@ -40,7 +40,7 @@ def test_all_strings_translated(lang):
     missing = []
     with translation.override(lang):
         for s in ui_strings():
-            if translation.gettext(s) == s and s not in {"Status", "status", "slug"}:
+            if translation.gettext(s) == s and s not in {"Status", "status", "slug", "slot"}:
                 missing.append(s)
     assert missing == []
 

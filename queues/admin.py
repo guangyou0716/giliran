@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Branch, Counter, Membership, Service, Ticket, TicketEvent
+from .forms import SlotForm
+from .models import Booking, Branch, Counter, Membership, Service, Slot, Ticket, TicketEvent
 
 
 @admin.register(Branch)
@@ -40,3 +41,19 @@ class TicketAdmin(admin.ModelAdmin):
     search_fields = ["code", "nickname"]
     readonly_fields = ["token"]
     inlines = [TicketEventInline]
+
+
+@admin.register(Slot)
+class SlotAdmin(admin.ModelAdmin):
+    form = SlotForm  # refuses a capacity below the seats already booked
+    list_display = ["starts_at", "service", "capacity", "booked_count", "is_active"]
+    list_filter = ["service__branch", "is_active"]
+    readonly_fields = ["booked_count"]
+
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ["ref", "slot", "nickname", "status", "created_at"]
+    list_filter = ["status", "slot__service__branch"]
+    search_fields = ["ref", "nickname"]
+    readonly_fields = ["token", "ref", "slot", "status", "ticket"]

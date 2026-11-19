@@ -15,20 +15,61 @@ Rules
       waiting --call--> called --start--> serving --done--> done
       called  --recall--> called      called --done--> done
       called  --no_show--> no_show    waiting --cancel--> cancelled
+
+Appointments
+------------
+* A ``Slot`` has ``capacity`` seats. ``book_slot`` locks the slot row
+  (``SELECT ... FOR UPDATE``), checks the seats, and increments ``booked_count``
+  with a conditional ``UPDATE ... WHERE booked_count < capacity``. The check
+  constraint ``booked_count <= capacity`` is the last line of defence: the
+  database rejects any write that would overbook, whatever the code does.
+* Booking statuses::
+
+      booked --check_in--> checked_in (creates a WAITING ticket)
+      booked --cancel--> cancelled (frees the seat)
+      booked --(not checked in by start + grace)--> no_show
+      no_show --staff check_in, same day--> checked_in (ordered like a walk-in)
+
+* Fair interleaving (``waiting_order``). Every waiting ticket gets a rank:
+
+  0. priority tickets (elderly, disabled, pregnant, urgent);
+  1. booked tickets whose slot time has come (checked in no later than
+     ``start + GILIRAN_BOOKING_GRACE_MIN``);
+  2. everyone else.
+
+  Inside a rank tickets go by queue time (slot start for on-time bookings, join
+  time for walk-ins), then by id. A booked customer who arrives early waits as
+  if they had joined at their slot time, so they never pass walk-ins who were
+  already there; from the slot time on they are called before regular walk-ins.
+  A late check-in (after the grace window) is queued like a walk-in from the
+  moment of check-in. Managers keep walk-ins moving by giving slots fewer seats
+  than the counters can serve.
 """
 
 from __future__ import annotations
 
 import math
+import secrets
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
-from django.db import transaction
-from django.db.models import Q
+from django.conf import settings
+from django.db import IntegrityError, transaction
+from django.db.models import Case, F, IntegerField, Value, When
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from .models import Branch, Counter, DailySequence, Service, Ticket, TicketEvent
+from .models import (
+    Booking,
+    Branch,
+    Counter,
+    DailySequence,
+    Service,
+    Slot,
+    Ticket,
+    TicketEvent,
+)
 
 S = Ticket.Status
 
@@ -66,9 +107,18 @@ def local_day(now: datetime | None = None) -> date:
     return timezone.localdate(now or timezone.now())
 
 
-def queue_order():
-    """Order in which waiting tickets are called."""
-    return ("-priority", "id")
+def waiting_order(queryset, now: datetime | None = None):
+    """Order waiting tickets in the order they will be called (see module docstring)."""
+    now = now or timezone.now()
+    return queryset.annotate(
+        queue_rank=Case(
+            When(priority=True, then=Value(0)),
+            When(appointment_at__lte=now, then=Value(1)),
+            default=Value(2),
+            output_field=IntegerField(),
+        ),
+        queue_at=Coalesce("appointment_at", "created_at"),
+    ).order_by("queue_rank", "queue_at", "id")
 
 
 def _log(ticket: Ticket, action: str, from_status: str, actor, counter, at: datetime) -> None:
@@ -96,6 +146,7 @@ def issue_ticket(
     source: str = Ticket.Source.SELF,
     actor=None,
     now: datetime | None = None,
+    appointment_at: datetime | None = None,
 ) -> Ticket:
     """Take the next number for ``service`` today and create a WAITING ticket."""
     now = now or timezone.now()
@@ -119,6 +170,7 @@ def issue_ticket(
         priority=priority,
         source=source,
         created_at=now,
+        appointment_at=appointment_at,
     )
     _log(ticket, "issue", "", actor, None, now)
     return ticket
@@ -132,18 +184,15 @@ def active_ticket(counter: Counter) -> Ticket | None:
     )
 
 
-def waiting_for_counter(counter: Counter, *, day: date | None = None):
-    day = day or local_day()
-    return (
-        Ticket.objects.filter(
-            branch_id=counter.branch_id,
-            service__in=counter.services.all(),
-            status=S.WAITING,
-            day=day,
-        )
-        .select_related("service")
-        .order_by(*queue_order())
-    )
+def waiting_for_counter(counter: Counter, *, now: datetime | None = None):
+    now = now or timezone.now()
+    tickets = Ticket.objects.filter(
+        branch_id=counter.branch_id,
+        service__in=counter.services.all(),
+        status=S.WAITING,
+        day=local_day(now),
+    ).select_related("service")
+    return waiting_order(tickets, now)
 
 
 def call_next(counter: Counter, *, actor=None, now: datetime | None = None) -> Ticket | None:
@@ -157,7 +206,7 @@ def call_next(counter: Counter, *, actor=None, now: datetime | None = None) -> T
         if active_ticket(counter) is not None:
             raise CounterBusy(_("Finish or mark the current ticket as no-show first."))
         ticket = (
-            waiting_for_counter(counter, day=local_day(now))
+            waiting_for_counter(counter, now=now)
             .select_for_update(skip_locked=True, of=("self",))
             .first()
         )
@@ -202,7 +251,7 @@ def apply_action(ticket: Ticket, action: str, *, actor=None, now: datetime | Non
         return ticket
 
 
-def people_ahead(ticket: Ticket) -> int | None:
+def people_ahead(ticket: Ticket, *, now: datetime | None = None) -> int | None:
     """Waiting tickets of the same service that will be called before this one.
 
     Counters that also serve other services may call those in between, so for
@@ -210,15 +259,12 @@ def people_ahead(ticket: Ticket) -> int | None:
     """
     if ticket.status != S.WAITING:
         return None
-    return (
-        Ticket.objects.filter(service_id=ticket.service_id, day=ticket.day, status=S.WAITING)
-        .filter(
-            Q(priority=True, id__lt=ticket.id)
-            if ticket.priority
-            else Q(priority=True) | Q(priority=False, id__lt=ticket.id)
-        )
-        .count()
+    same_queue = Ticket.objects.filter(
+        service_id=ticket.service_id, day=ticket.day, status=S.WAITING
     )
+    order = list(waiting_order(same_queue, now).values_list("id", flat=True))
+    # One service's waiting list for one day is small; the index is the position.
+    return order.index(ticket.id) if ticket.id in order else None
 
 
 def estimate_wait_minutes(ahead: int, avg_minutes: int, counters: int) -> int | None:
@@ -260,11 +306,12 @@ class TicketView:
             "counter": t.counter.name if t.counter_id else None,
             "recall_count": t.recall_count,
             "called_at": t.called_at.isoformat() if t.called_at else None,
+            "appointment_at": t.appointment_at.isoformat() if t.appointment_at else None,
         }
 
 
-def ticket_view(ticket: Ticket) -> TicketView:
-    ahead = people_ahead(ticket)
+def ticket_view(ticket: Ticket, *, now: datetime | None = None) -> TicketView:
+    ahead = people_ahead(ticket, now=now)
     eta = None
     if ahead is not None:
         counters = ticket.service.counters.filter(is_active=True).count()
@@ -277,7 +324,7 @@ def board(branch: Branch, *, now: datetime | None = None, next_limit: int = 6) -
     day = local_day(now)
     today = Ticket.objects.filter(branch=branch, day=day).select_related("service", "counter")
     serving = today.filter(status__in=Ticket.ACTIVE_STATUSES).order_by("-called_at", "-id")
-    waiting = today.filter(status=S.WAITING).order_by(*queue_order())
+    waiting = waiting_order(today.filter(status=S.WAITING), now)
     services = []
     for service in branch.services.filter(is_active=True):
         services.append(
@@ -303,3 +350,167 @@ def board(branch: Branch, *, now: datetime | None = None, next_limit: int = 6) -
         "services": services,
         "waiting_total": waiting.count(),
     }
+
+
+# --- Appointments -------------------------------------------------------------------------
+
+
+class BookingError(QueueError):
+    """A booking operation that cannot be done (slot full, window closed, ...)."""
+
+
+class SlotFull(BookingError):
+    pass
+
+
+B = Booking.Status
+REF_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O, 1/I
+
+
+def grace() -> timedelta:
+    return timedelta(minutes=settings.GILIRAN_BOOKING_GRACE_MIN)
+
+
+def checkin_opens(slot: Slot) -> datetime:
+    return slot.starts_at - timedelta(minutes=settings.GILIRAN_CHECKIN_EARLY_MIN)
+
+
+def checkin_closes(slot: Slot) -> datetime:
+    """Last moment for an on-time check-in (and for booking the slot)."""
+    return slot.starts_at + grace()
+
+
+def normalize_phone(raw: str) -> str:
+    """Keep digits and a leading +: "000-000 0101" -> "0000000101"."""
+    raw = raw.strip()
+    digits = "".join(ch for ch in raw if ch.isdigit())
+    return ("+" + digits) if raw.startswith("+") else digits
+
+
+def bookable_slots(service: Service, day: date, *, now: datetime | None = None):
+    """Open slots of ``service`` on local ``day`` that can still be booked, with seats left."""
+    now = now or timezone.now()
+    return (
+        Slot.objects.filter(
+            service=service,
+            is_active=True,
+            starts_at__date=day,
+            starts_at__gt=now - grace(),
+            booked_count__lt=F("capacity"),
+        )
+        .select_related("service")
+        .order_by("starts_at")
+    )
+
+
+def _new_ref() -> str:
+    return "".join(secrets.choice(REF_ALPHABET) for _ in range(6))
+
+
+def book_slot(slot: Slot, *, nickname: str, phone: str, now: datetime | None = None) -> Booking:
+    """Take one seat in ``slot``. Raises SlotFull / BookingError; never overbooks."""
+    now = now or timezone.now()
+    phone = normalize_phone(phone)
+    with transaction.atomic():
+        # Serialise bookings of this slot: concurrent requests queue on this row lock.
+        slot = (
+            Slot.objects.select_for_update(of=("self",)).select_related("service").get(pk=slot.pk)
+        )
+        if not slot.is_active or not slot.service.is_active:
+            raise BookingError(_("This time is not open for booking."))
+        if now > checkin_closes(slot):
+            raise BookingError(_("This time has already passed."))
+        if Booking.objects.filter(
+            slot=slot, phone=phone, status__in=[B.BOOKED, B.CHECKED_IN]
+        ).exists():
+            raise BookingError(_("This phone number already has a booking at this time."))
+        # Conditional increment: a no-op when the slot is full, even without the lock.
+        taken = Slot.objects.filter(pk=slot.pk, booked_count__lt=F("capacity")).update(
+            booked_count=F("booked_count") + 1
+        )
+        if not taken:
+            raise SlotFull(_("Sorry, this time was just fully booked. Please pick another."))
+        for _attempt in range(5):
+            try:
+                with transaction.atomic():
+                    return Booking.objects.create(
+                        slot=slot,
+                        ref=_new_ref(),
+                        nickname=nickname.strip()[:40],
+                        phone=phone,
+                        created_at=now,
+                    )
+            except IntegrityError:  # pragma: no cover - 32^6 refs; retry on a clash
+                continue
+        raise BookingError(_("Could not create the booking. Please try again."))
+
+
+def cancel_booking(booking: Booking, *, now: datetime | None = None) -> Booking:
+    """Customer cancels a booking that is not checked in yet; the seat is freed."""
+    now = now or timezone.now()
+    with transaction.atomic():
+        slot = Slot.objects.select_for_update().get(pk=booking.slot_id)
+        booking = Booking.objects.select_for_update().get(pk=booking.pk)
+        if booking.status != B.BOOKED or now > checkin_closes(slot):
+            raise BookingError(_("This booking can no longer be cancelled."))
+        booking.status = B.CANCELLED
+        booking.cancelled_at = now
+        booking.save(update_fields=["status", "cancelled_at"])
+        Slot.objects.filter(pk=slot.pk).update(booked_count=F("booked_count") - 1)
+        booking.slot = Slot.objects.get(pk=slot.pk)
+        return booking
+
+
+def expire_bookings(*, now: datetime | None = None, branch: Branch | None = None) -> int:
+    """Mark bookings not checked in by slot start + grace as no-show. Returns how many."""
+    now = now or timezone.now()
+    late = Booking.objects.filter(status=B.BOOKED, slot__starts_at__lt=now - grace())
+    if branch is not None:
+        late = late.filter(slot__service__branch=branch)
+    return late.update(status=B.NO_SHOW)
+
+
+def check_in(
+    booking: Booking, *, by_staff: bool = False, actor=None, now: datetime | None = None
+) -> Ticket:
+    """Turn a booking into a WAITING ticket.
+
+    Customers (via their link) can check in from ``GILIRAN_CHECKIN_EARLY_MIN`` before
+    the slot until start + grace. Staff can check in any booked or no-show booking on
+    the slot's day; after the grace window the ticket is ordered like a walk-in.
+    """
+    now = now or timezone.now()
+    with transaction.atomic():
+        booking = (
+            Booking.objects.select_for_update(of=("self",))
+            .select_related("slot__service__branch")
+            .get(pk=booking.pk)
+        )
+        slot = booking.slot
+        on_time = now <= checkin_closes(slot)
+        if booking.status not in (B.BOOKED, B.NO_SHOW):
+            raise BookingError(_("This booking cannot be checked in."))
+        if not by_staff and (booking.status == B.NO_SHOW or not on_time):
+            raise BookingError(
+                _("The check-in time for this booking has passed. Please ask at the counter.")
+            )
+        if local_day(now) != local_day(slot.starts_at):
+            raise BookingError(_("Bookings can only be checked in on the day of the appointment."))
+        if not by_staff and now < checkin_opens(slot):
+            raise BookingError(
+                _("Check-in opens at %(time)s.")
+                % {"time": timezone.localtime(checkin_opens(slot)).strftime("%H:%M")}
+            )
+        ticket = issue_ticket(
+            slot.service,
+            nickname=booking.nickname,
+            source=Ticket.Source.BOOKING,
+            actor=actor,
+            now=now,
+            appointment_at=slot.starts_at if on_time else None,
+        )
+        booking.status = B.CHECKED_IN
+        booking.checked_in_at = now
+        booking.ticket = ticket
+        booking.save(update_fields=["status", "checked_in_at", "ticket"])
+        return ticket
