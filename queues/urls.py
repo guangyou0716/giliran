@@ -34,7 +34,9 @@ manage_patterns = (
 api_patterns = (
     [
         path("tickets/<uuid:token>/", api.ticket_status, name="ticket"),
+        path("tickets/<uuid:token>/stream/", api.ticket_stream, name="ticket_stream"),
         path("branches/<slug:slug>/board/", api.board, name="board"),
+        path("branches/<slug:slug>/board/stream/", api.board_stream, name="board_stream"),
     ],
     "api",
 )

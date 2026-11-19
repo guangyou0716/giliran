@@ -121,6 +121,18 @@ SECURE_REFERRER_POLICY = "same-origin"
 # How often (milliseconds) the ticket page and display board poll for updates.
 GILIRAN_POLL_MS = int(os.environ.get("GILIRAN_POLL_MS", "5000"))
 
+# Live updates by Server-Sent Events (queues/streams.py); pages fall back to polling.
+# Each open stream holds one worker thread for up to GILIRAN_SSE_MAX_SECONDS, so run
+# gunicorn with threads (e.g. --worker-class gthread --threads 32) or set GILIRAN_SSE=0
+# to use polling only.
+GILIRAN_SSE = os.environ.get("GILIRAN_SSE", "1") not in ("0", "false", "False", "")
+GILIRAN_SSE_MAX_SECONDS = float(os.environ.get("GILIRAN_SSE_MAX_SECONDS", "60"))
+GILIRAN_SSE_TICK_SECONDS = float(os.environ.get("GILIRAN_SSE_TICK_SECONDS", "1.5"))
+GILIRAN_SSE_HEARTBEAT_SECONDS = float(os.environ.get("GILIRAN_SSE_HEARTBEAT_SECONDS", "15"))
+GILIRAN_SSE_REFRESH_SECONDS = float(os.environ.get("GILIRAN_SSE_REFRESH_SECONDS", "10"))
+# The ticket page shows "almost your turn" (and plays the chime) at this many people ahead.
+GILIRAN_ALMOST_AHEAD = int(os.environ.get("GILIRAN_ALMOST_AHEAD", "2"))
+
 # Appointments (see queues/engine.py "Appointments").
 # Minutes after a slot starts during which a booked customer can still check in on time
 # (and still book it); later bookings become no-shows.

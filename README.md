@@ -31,10 +31,15 @@ Screenshots are taken by the Playwright end-to-end test from a local run on synt
 - **Join from the phone** (`/b/<branch>/join/`): choose a service, optional nickname (no IC / phone collected),
   get a ticket like `A-007`. Numbers restart at 1 per service per Malaysia-time day.
 - **Live ticket page** (`/t/<secret token>/`): status, people ahead, estimated wait, "Please go to Room 1"
-  when called, cancel while waiting. Updates by polling a JSON endpoint; works without JavaScript (reload).
+  when called, cancel while waiting. Updates are pushed live by Server-Sent Events, with polling as the fallback;
+  works without JavaScript (reload). See [Live updates](#live-updates).
+- **"Almost your turn" alert**: when 2 or fewer people are ahead (`GILIRAN_ALMOST_AHEAD`) and again when the
+  number is called (or called again), the page shows a banner and announces it to screen readers; after the
+  customer ticks *Play a sound and notify me*, it also plays a short chime and shows a notification.
 - **Counter console** for staff: call next (priority tickets first, then first come first served), call again,
   start serving, done, no-show; add walk-ins at the desk with a priority flag (elderly, disabled, pregnant, urgent).
-- **Display board** (`/b/<branch>/board/`) for a TV: now serving per counter, next numbers, waiting per service.
+- **Display board** (`/b/<branch>/board/`) for a TV: now serving per counter, next numbers, waiting per service;
+  updated live like the ticket page.
 - **Appointments** (`/b/<branch>/book/`): pick a service, a day (next 7 days) and a free time slot, enter a
   nickname and a phone number (no account). The secret booking link (`/a/<token>/`) shows the reference, lets the
   customer cancel (frees the seat) and check in from 30 minutes before the slot; check-in turns the booking into a
@@ -56,6 +61,42 @@ Screenshots are taken by the Playwright end-to-end test from a local run on synt
   language switcher in the header.
 - **Accessibility**: semantic forms and tables, `aria-live` status regions, skip link, visible focus,
   44 px touch targets, reduced-motion support.
+
+## Live updates
+
+The ticket page and the display board open a [Server-Sent Events](https://developer.mozilla.org/docs/Web/API/Server-sent_events)
+stream (`EventSource`):
+
+| Page | Stream | Same JSON as |
+|---|---|---|
+| `/t/<token>/` | `/api/tickets/<token>/stream/` (only with the secret ticket token) | `/api/tickets/<token>/` |
+| `/b/<branch>/board/` | `/api/branches/<branch>/board/stream/` (public board fields only: codes, counters, counts) | `/api/branches/<branch>/board/` |
+
+- The stream sends the current state at once. Then, every 1.5 s (`GILIRAN_SSE_TICK_SECONDS`), it reads a cheap change
+  marker (the newest ticket event id of the branch: every issue / call / done / cancel writes one) and rebuilds the
+  payload only when the marker moved, or every 10 s anyway (`GILIRAN_SSE_REFRESH_SECONDS`, because estimates also
+  depend on the clock and on counter settings). A message is sent only when the payload changed; a `: ping` comment
+  every 15 s of silence keeps proxies from closing the connection.
+- Streams are bounded for plain sync Django: after 60 s (`GILIRAN_SSE_MAX_SECONDS`) the server sends `event: bye`
+  and closes, and the page reconnects at once. A finished ticket (done, no-show, cancelled) gets `event: end` and the
+  page stops. Responses carry `Cache-Control: no-cache` and `X-Accel-Buffering: no` (nginx does not buffer them).
+- **Fallback**: without `EventSource`, when the server refuses the stream (e.g. `GILIRAN_SSE=0` -> 404, or a proxy
+  error), or after 3 failed reconnects in a row, the page polls the JSON endpoint every `GILIRAN_POLL_MS` (5000)
+  instead. Without JavaScript the page still shows the state on reload.
+- **Deployment**: each open stream holds a worker thread for up to a minute. Run gunicorn with threads, e.g.
+  `gunicorn config.wsgi --worker-class gthread --workers 2 --threads 32`, size the threads for the expected number
+  of open ticket pages and boards, or set `GILIRAN_SSE=0` to use polling only.
+  The streams are plain synchronous generators for WSGI; under ASGI Django would buffer them, so set
+  `GILIRAN_SSE=0` if you serve the app with an ASGI server.
+
+**Sound and notifications.** Browsers only play audio after a user gesture, so the ticket page has a checkbox
+*Play a sound and notify me when it is almost my turn*. Ticking it creates the audio context (a short test chime, made
+with WebAudio oscillators, no audio file) and asks for notification permission. Alerts fire once per change (2 or
+fewer ahead, called, called again), not on every update, and not again after a reload: a single chime when it is
+almost your turn, a double chime when called, a vibration where the phone supports it, a notification while the tab
+is in the background (if allowed; some mobile browsers do not allow page notifications), and an `aria-live`
+announcement such as "Your number A-004 is being called. Please go to Room 1." The banner and the announcement work
+even when sound is off.
 
 ## How the queue stays correct
 
@@ -153,10 +194,11 @@ to check that every string is translated and the `.mo` files are current.
 ```bash
 ruff check . && ruff format --check .
 python scripts/messages.py               # translations complete and compiled
-pytest -m "not e2e"                      # unit + integration (engine, views, API, reports, i18n, seed, concurrency)
+pytest -m "not e2e"                      # unit + integration (engine, views, API, streams, reports, i18n, seed, concurrency)
 python -m playwright install chromium
 pytest -m e2e                            # browser: join -> call -> board -> history; book -> check in -> call;
-                                         # manager reports -> filter -> CSV download
+                                         # manager reports -> filter -> CSV download; live push (SSE) with the
+                                         # "almost your turn" alert (audio stubbed) and the polling fallback
 ```
 
 Set `DATABASE_URL` to a PostgreSQL database to also run the concurrency tests (they are skipped on SQLite).
@@ -165,8 +207,9 @@ Set `DATABASE_URL` to a PostgreSQL database to also run the concurrency tests (t
 
 1. ~~Appointments~~ (done): slots with capacity, booking link, check-in into the queue, no-shows.
 2. ~~Reports~~ (done): waits, service time and no-show rate per service / hour, CSV export.
-3. Server-Sent Events instead of polling; "almost your turn" notification and chime.
-4. Docker Compose (web + PostgreSQL), transfer a ticket between services, counter pause, axe accessibility audit.
+3. ~~Live updates~~ (done): Server-Sent Events with polling fallback; "almost your turn" alert and chime.
+4. Docker Compose (web + PostgreSQL), transfer a ticket between services, counter pause, rate limits on joining
+   and booking, phone retention purge for old bookings, axe accessibility audit.
 
 ## License
 
