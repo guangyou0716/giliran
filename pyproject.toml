@@ -1,0 +1,24 @@
+[project]
+name = "giliran"
+version = "0.1.0"
+description = "Trilingual walk-in queue and live display web system (Django + PostgreSQL)."
+requires-python = ">=3.12"
+license = "MIT"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["queues/migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "C4", "SIM"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S311"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["e2e: browser end-to-end tests (Playwright)"]

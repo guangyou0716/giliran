@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Take a number" %} · {{ branch.name }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <p class="eyebrow">{{ branch.name }}</p>
+  <h1>{% translate "Take a number" %}</h1>
+  {% if not branch.is_open %}
+    <p class="notice">{% translate "This branch is not taking new tickets right now. Please ask at the front desk." %}</p>
+  {% elif not services %}
+    <p class="notice">{% translate "No services are open right now." %}</p>
+  {% else %}
+  <form method="post" novalidate>{% csrf_token %}
+    <fieldset>
+      <legend>{{ form.service.label }}</legend>
+      {% if form.service.errors %}<p class="error" role="alert">{{ form.service.errors.0 }}</p>{% endif %}
+      <div class="choices">
+      {% for service, waiting in services %}
+        <label class="choice">
+          <input type="radio" name="service" value="{{ service.pk }}" required{% if form.service.value|stringformat:"s" == service.pk|stringformat:"s" %} checked{% endif %}>
+          <span class="choice-body">
+            <span class="choice-prefix" aria-hidden="true">{{ service.prefix }}</span>
+            <span class="choice-name">{{ service.name }}</span>
+            <span class="choice-meta">{% blocktranslate with n=waiting %}{{ n }} waiting{% endblocktranslate %}</span>
+          </span>
+        </label>
+      {% endfor %}
+      </div>
+    </fieldset>
+    <label for="{{ form.nickname.id_for_label }}">{{ form.nickname.label }}</label>
+    {{ form.nickname }}
+    <p class="help">{{ form.nickname.help_text }}</p>
+    <button type="submit" class="btn btn-primary btn-block">{% translate "Get my ticket" %}</button>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}
