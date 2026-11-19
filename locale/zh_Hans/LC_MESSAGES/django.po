@@ -816,3 +816,17 @@ msgstr "至"
 
 msgid "Wait: from taking the ticket (or checking in for an appointment) to the first call."
 msgstr "等候：从取号（或预约签到）到第一次叫号。"
+
+# Live updates (increment 4)
+
+msgid "Almost your turn. People ahead: {n}."
+msgstr "快轮到您了。前面还有 {n} 人。"
+
+msgid "Your number {code} is being called. Please go to {counter}."
+msgstr "正在叫您的号码 {code}，请前往 {counter}。"
+
+msgid "Almost your turn! Please stay near the counters."
+msgstr "快轮到您了！请在柜台附近等候。"
+
+msgid "Play a sound and notify me when it is almost my turn"
+msgstr "快轮到我时播放提示音并通知我"

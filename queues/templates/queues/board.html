@@ -5,7 +5,7 @@
 {% block footer %}{% endblock %}
 {% block main_class %}board{% endblock %}
 {% block content %}
-<div id="board" data-poll-url="{% url 'api:board' branch.slug %}" data-poll-ms="{{ poll_ms }}">
+<div id="board" data-poll-url="{% url 'api:board' branch.slug %}" data-poll-ms="{{ poll_ms }}"{% if sse %} data-stream-url="{% url 'api:board_stream' branch.slug %}"{% endif %}>
   <header class="board-head">
     <h1>{{ branch.name }}</h1>
     <p>{% translate "Scan the QR code at the entrance to take a number" %} · <span class="board-url">{{ request.scheme }}://{{ request.get_host }}{% url 'join' branch.slug %}</span></p>

@@ -3,6 +3,11 @@
 {% block content %}
 <section class="card narrow ticket status-{{ t.status }}" id="ticket"
   data-poll-url="{% url 'api:ticket' t.token %}" data-poll-ms="{{ poll_ms }}"
+  {% if sse %}data-stream-url="{% url 'api:ticket_stream' t.token %}"{% endif %}
+  data-status="{{ t.status }}" data-recall-count="{{ t.recall_count }}"
+  data-almost-ahead="{{ almost_ahead }}" data-is-almost="{{ is_almost|yesno:'1,0' }}"
+  data-t-almost="{% translate 'Almost your turn. People ahead: {n}.' %}"
+  data-t-called="{% translate 'Your number {code} is being called. Please go to {counter}.' %}"
   data-t-minutes="{% translate '~{n} min' %}" data-t-next="{% translate 'You are next' %}"
   data-t-none="—">
   <p class="eyebrow">{{ t.branch.name }} · {{ t.service.name }}</p>
@@ -16,11 +21,19 @@
   <p class="called-banner" data-show-when="called serving" {% if t.status != 'called' and t.status != 'serving' %}hidden{% endif %}>
     {% translate "Please go to" %} <strong data-field="counter">{{ t.counter.name|default:"" }}</strong>
   </p>
+  <p class="almost-banner" data-almost-banner {% if not is_almost %}hidden{% endif %}>
+    {% translate "Almost your turn! Please stay near the counters." %}
+  </p>
   <dl class="stats" data-show-when="waiting" {% if t.status != 'waiting' %}hidden{% endif %}>
     <div><dt>{% translate "People ahead" %}</dt><dd data-field="ahead">{{ view.ahead|default_if_none:"—" }}</dd></div>
     <div><dt>{% translate "Estimated wait" %}</dt><dd data-field="eta">{{ view.eta_text }}</dd></div>
   </dl>
   <p class="help">{% translate "This page updates by itself. Keep it open or bookmark it." %}</p>
+  <p class="alerts-toggle" data-alerts-toggle data-show-when="waiting called serving" hidden>
+    <label class="check"><input type="checkbox" id="alerts-toggle">
+      {% translate "Play a sound and notify me when it is almost my turn" %}</label>
+  </p>
+  <p class="sr-only" aria-live="assertive" aria-atomic="true" data-announcer></p>
   <form method="post" action="{% url 'ticket_cancel' t.token %}" data-show-when="waiting" {% if t.status != 'waiting' %}hidden{% endif %}>{% csrf_token %}
     <button type="submit" class="btn btn-danger-outline">{% translate "Cancel my ticket" %}</button>
   </form>

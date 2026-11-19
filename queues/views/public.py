@@ -45,10 +45,20 @@ def ticket(request, token):
         Ticket.objects.select_related("service", "branch", "counter"), token=token
     )
     view = engine.ticket_view(t)
+    almost = settings.GILIRAN_ALMOST_AHEAD
     return render(
         request,
         "queues/ticket.html",
-        {"t": t, "view": view, "poll_ms": settings.GILIRAN_POLL_MS},
+        {
+            "t": t,
+            "view": view,
+            "poll_ms": settings.GILIRAN_POLL_MS,
+            "sse": settings.GILIRAN_SSE,
+            "almost_ahead": almost,
+            "is_almost": t.status == Ticket.Status.WAITING
+            and view.ahead is not None
+            and view.ahead <= almost,
+        },
     )
 
 
@@ -69,5 +79,10 @@ def board(request, slug):
     return render(
         request,
         "queues/board.html",
-        {"branch": branch, "data": engine.board(branch), "poll_ms": settings.GILIRAN_POLL_MS},
+        {
+            "branch": branch,
+            "data": engine.board(branch),
+            "poll_ms": settings.GILIRAN_POLL_MS,
+            "sse": settings.GILIRAN_SSE,
+        },
     )
