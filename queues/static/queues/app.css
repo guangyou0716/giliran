@@ -158,3 +158,24 @@ legend { font-weight: 700; margin-bottom: .5rem; }
 @keyframes pulse { 50% { filter: brightness(1.25); } }
 @media (prefers-reduced-motion: reduce) { .board-serving li:first-child { animation: none; } }
 @media (max-width: 760px) { .board-grid { grid-template-columns: 1fr; } }
+
+/* Appointments */
+.slot-grid { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.slot-choice { margin: 0; cursor: pointer; }
+.slot-choice input { position: absolute; opacity: 0; }
+.slot-body { display: grid; justify-items: center; padding: .55rem .5rem; min-height: 44px; border: 2px solid var(--line); border-radius: 12px; background: #fff; }
+.slot-time { font-weight: 800; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.slot-meta { color: var(--muted); font-weight: 500; font-size: .8rem; }
+.slot-choice input:checked + .slot-body { border-color: var(--primary); background: var(--primary-soft); }
+.slot-choice input:focus-visible + .slot-body { outline: 3px solid #f59e0b; outline-offset: 2px; }
+.booking-time { font-size: clamp(1.6rem, 7vw, 2.2rem); font-weight: 900; margin: .25rem 0 .5rem; font-variant-numeric: tabular-nums; }
+.stats dd.small-dd { font-size: 1.1rem; overflow-wrap: anywhere; }
+.pill-booked { background: var(--primary-soft); color: var(--primary); }
+.pill.status-booked { background: var(--primary-soft); color: var(--primary); }
+.pill.status-checked_in { background: #e7f6ec; color: var(--ok); }
+input[type=time] { width: 100%; padding: .65rem .75rem; border: 1px solid var(--line); border-radius: 10px; font: inherit; background: #fff; min-height: 44px; }
+.appointments-table .slot-cell { font-variant-numeric: tabular-nums; vertical-align: top; color: var(--text); font-size: .95rem; text-transform: none; letter-spacing: 0; }
+.appointments-table td[rowspan] { vertical-align: top; }
+.small-heading { font-size: .95rem; margin: 1.25rem 0 .5rem; color: var(--muted); }
+.chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.chips li { padding: .25rem .6rem; border: 1px solid var(--line); border-radius: 999px; font-size: .85rem; font-variant-numeric: tabular-nums; }

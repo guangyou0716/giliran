@@ -120,3 +120,12 @@ SECURE_REFERRER_POLICY = "same-origin"
 
 # How often (milliseconds) the ticket page and display board poll for updates.
 GILIRAN_POLL_MS = int(os.environ.get("GILIRAN_POLL_MS", "5000"))
+
+# Appointments (see queues/engine.py "Appointments").
+# Minutes after a slot starts during which a booked customer can still check in on time
+# (and still book it); later bookings become no-shows.
+GILIRAN_BOOKING_GRACE_MIN = int(os.environ.get("GILIRAN_BOOKING_GRACE_MIN", "10"))
+# Customers can check themselves in from this many minutes before their slot.
+GILIRAN_CHECKIN_EARLY_MIN = int(os.environ.get("GILIRAN_CHECKIN_EARLY_MIN", "30"))
+# How many days ahead (including today) the booking page offers.
+GILIRAN_BOOKING_DAYS = int(os.environ.get("GILIRAN_BOOKING_DAYS", "7"))

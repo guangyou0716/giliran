@@ -11,6 +11,7 @@
   <p class="ticket-status" role="status" aria-live="polite">
     <span class="pill" data-field="status_label">{{ t.get_status_display }}</span>
     {% if t.priority %}<span class="pill pill-priority">{% translate "Priority" %}</span>{% endif %}
+    {% if t.appointment_at %}<span class="pill pill-booked">{% blocktranslate with time=t.appointment_at|time:"H:i" %}Booked {{ time }}{% endblocktranslate %}</span>{% endif %}
   </p>
   <p class="called-banner" data-show-when="called serving" {% if t.status != 'called' and t.status != 'serving' %}hidden{% endif %}>
     {% translate "Please go to" %} <strong data-field="counter">{{ t.counter.name|default:"" }}</strong>

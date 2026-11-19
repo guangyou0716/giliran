@@ -21,6 +21,7 @@
     {% endfor %}
   </ul>
   <p class="actions">
+    <a class="btn" href="{% url 'staff:appointments' row.branch.slug %}">{% translate "Appointments" %}</a>
     <a class="btn" href="{% url 'staff:history' row.branch.slug %}">{% translate "Ticket history" %}</a>
     <a class="btn" href="{% url 'board' row.branch.slug %}">{% translate "Display board" %}</a>
     <a class="btn" href="{% url 'join' row.branch.slug %}">{% translate "Join page" %}</a>

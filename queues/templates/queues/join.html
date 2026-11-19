@@ -32,5 +32,6 @@
     <button type="submit" class="btn btn-primary btn-block">{% translate "Get my ticket" %}</button>
   </form>
   {% endif %}
+  <p class="help">{% translate "Prefer a fixed time?" %} <a href="{% url 'book' branch.slug %}">{% translate "Book an appointment" %}</a></p>
 </section>
 {% endblock %}

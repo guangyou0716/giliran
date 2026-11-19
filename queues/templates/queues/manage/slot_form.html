@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Edit slot" %}{% endblock %}
+{% block content %}
+<p class="eyebrow"><a href="{% url 'manage:slots' branch.slug %}?day={{ day|date:'Y-m-d' }}">{{ branch.name }} · {% translate "Appointment slots" %}</a></p>
+<section class="card narrow">
+  <h1>{% translate "Edit slot" %}</h1>
+  <p><strong>{{ slot.service.prefix }} {{ slot.service.name }}</strong> · {{ slot.starts_at|date:"Y-m-d" }} {{ slot.starts_at|time:"H:i" }}–{{ slot.ends_at|time:"H:i" }}</p>
+  <p class="muted">{% blocktranslate with n=slot.booked_count %}Seats taken: {{ n }}{% endblocktranslate %}</p>
+  <form method="post" novalidate class="stacked">{% csrf_token %}
+    {% for field in form %}
+      <div class="field{% if field.errors %} has-error{% endif %}">
+        {% if field.field.widget.input_type == "checkbox" %}
+          <label class="check">{{ field }} {{ field.label }}</label>
+        {% else %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+        {% endif %}
+        {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
+        {% for e in field.errors %}<p class="error" role="alert">{{ e }}</p>{% endfor %}
+      </div>
+    {% endfor %}
+    <p class="actions"><button type="submit" class="btn btn-primary">{% translate "Save" %}</button> <a class="btn" href="{% url 'manage:slots' branch.slug %}?day={{ day|date:'Y-m-d' }}">{% translate "Cancel" %}</a></p>
+  </form>
+  <form method="post" action="{% url 'manage:slot_delete' branch.slug slot.pk %}" class="actions">{% csrf_token %}
+    <button type="submit" class="btn btn-danger-outline"{% if has_bookings %} disabled aria-describedby="delete-help"{% endif %}>{% translate "Delete slot" %}</button>
+    {% if has_bookings %}<p id="delete-help" class="help">{% translate "Slots with bookings cannot be deleted; untick “open for booking” instead." %}</p>{% endif %}
+  </form>
+</section>
+{% endblock %}

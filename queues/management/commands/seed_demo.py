@@ -1,4 +1,5 @@
-"""Create synthetic demo data: 2 branches, services, counters, users and some tickets.
+"""Create synthetic demo data: 2 branches, services, counters, users, some tickets,
+appointment slots (today + 2 days) and a few bookings.
 
 All names are made up. Passwords come from --password or GILIRAN_DEMO_PASSWORD;
 if neither is given a random one is generated and printed once.
@@ -6,7 +7,7 @@ if neither is given a random one is generated and printed once.
 
 import os
 import secrets
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
@@ -14,7 +15,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from queues import engine
-from queues.models import Branch, Counter, Membership, Service, Ticket
+from queues.models import Booking, Branch, Counter, Membership, Service, Slot, Ticket
 
 DEMO = [
     {
@@ -28,6 +29,7 @@ DEMO = [
         ],
         "manager": "manager",
         "staff": ["staff1", "staff2"],
+        "bookable": "A",
     },
     {
         "name": "Demo Service Centre Cempaka",
@@ -36,10 +38,17 @@ DEMO = [
         "counters": [("Counter 1", ["S", "C"]), ("Counter 2", ["S"])],
         "manager": "manager2",
         "staff": ["staff3"],
+        "bookable": "S",
     },
 ]
 
 NICKNAMES = ["", "Ah Meng", "Siti", "Ravi", "", "Mei Ling", "Pak Cik", "", "Aina", "Kumar"]
+BOOKERS = ["Mak Cik Ros", "Jason", "Puan Nora", "Wei Jie"]
+# Clearly fake numbers (no real Malaysian number starts with 000).
+FAKE_PHONES = ["000-000 0101", "000-000 0102", "000-000 0103", "000-000 0104"]
+SLOT_DAYS = 3  # today and the next two days
+SLOT_START, SLOT_END, SLOT_MINUTES, SLOT_SEATS = time(9, 0), time(17, 0), 30, 2
+BOOKED_TIMES = [time(9, 0), time(9, 30), time(10, 0), time(11, 0)]
 
 
 class Command(BaseCommand):
@@ -94,8 +103,13 @@ class Command(BaseCommand):
                     user=user, branch=branch, defaults={"role": role}
                 )
 
+            bookable = services[spec["bookable"]]
+            self._slots(bookable)
+
             if opts["no_tickets"]:
                 continue
+            if not Booking.objects.filter(slot__service__branch=branch).exists():
+                self._bookings(bookable)
             today = engine.local_day()
             if Ticket.objects.filter(branch=branch, day=today).exists():
                 continue
@@ -105,6 +119,37 @@ class Command(BaseCommand):
         self.stdout.write("Accounts: admin (superuser), manager, staff1, staff2, manager2, staff3")
         if used_generated:
             self.stdout.write(f"Generated password for new demo accounts (shown once): {password}")
+
+    def _slots(self, service):
+        tz = timezone.get_current_timezone()
+        step = timedelta(minutes=SLOT_MINUTES)
+        for offset in range(SLOT_DAYS):
+            day = engine.local_day() + timedelta(days=offset)
+            start = datetime.combine(day, SLOT_START, tzinfo=tz)
+            last = datetime.combine(day, SLOT_END, tzinfo=tz)
+            while start + step <= last:
+                Slot.objects.get_or_create(
+                    service=service,
+                    starts_at=start,
+                    defaults={"ends_at": start + step, "capacity": SLOT_SEATS},
+                )
+                start += step
+
+    def _bookings(self, service):
+        """A few bookings today and tomorrow; booked "yesterday" so past slots are allowed."""
+        tz = timezone.get_current_timezone()
+        for offset in (0, 1):
+            day = engine.local_day() + timedelta(days=offset)
+            for i, at in enumerate(BOOKED_TIMES):
+                slot = Slot.objects.get(
+                    service=service, starts_at=datetime.combine(day, at, tzinfo=tz)
+                )
+                engine.book_slot(
+                    slot,
+                    nickname=BOOKERS[i],
+                    phone=FAKE_PHONES[i],
+                    now=slot.starts_at - timedelta(days=1),
+                )
 
     def _tickets(self, branch, services, count):
         start = timezone.now() - timedelta(minutes=count * 4)

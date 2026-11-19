@@ -134,6 +134,7 @@ class Ticket(models.Model):
     class Source(models.TextChoices):
         SELF = "self", _("Phone (QR)")
         DESK = "desk", _("Front desk")
+        BOOKING = "booking", _("Appointment")
 
     ACTIVE_STATUSES = (Status.CALLED, Status.SERVING)
     OPEN_STATUSES = (Status.WAITING, Status.CALLED, Status.SERVING)
@@ -162,6 +163,11 @@ class Ticket(models.Model):
     called_at = models.DateTimeField(null=True, blank=True)
     serving_at = models.DateTimeField(null=True, blank=True)
     finished_at = models.DateTimeField(null=True, blank=True)
+    appointment_at = models.DateTimeField(
+        _("appointment time"),
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         ordering = ["-day", "-id"]
@@ -209,3 +215,108 @@ class TicketEvent(models.Model):
 
     def __str__(self) -> str:
         return f"{self.ticket} {self.action} {self.from_status}->{self.to_status}"
+
+
+class Slot(models.Model):
+    """A bookable appointment time for one service, with a fixed number of seats.
+
+    ``booked_count`` counts bookings that hold a seat (booked, checked in or no-show).
+    It only changes inside ``engine.book_slot`` / ``engine.cancel_booking`` while the
+    slot row is locked, and the check constraint ``slot_not_overbooked`` makes the
+    database itself refuse any write that would put more bookings than seats.
+    """
+
+    service = models.ForeignKey(
+        Service, on_delete=models.CASCADE, related_name="slots", verbose_name=_("service")
+    )
+    starts_at = models.DateTimeField(_("starts at"))
+    ends_at = models.DateTimeField(_("ends at"))
+    capacity = models.PositiveSmallIntegerField(
+        _("capacity"),
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(50)],
+        help_text=_("How many people can book this time."),
+    )
+    booked_count = models.PositiveSmallIntegerField(_("booked"), default=0, editable=False)
+    is_active = models.BooleanField(_("open for booking"), default=True)
+
+    class Meta:
+        ordering = ["starts_at", "service__prefix"]
+        constraints = [
+            models.UniqueConstraint(fields=["service", "starts_at"], name="unique_slot_start"),
+            models.CheckConstraint(
+                condition=Q(booked_count__lte=models.F("capacity")), name="slot_not_overbooked"
+            ),
+            models.CheckConstraint(condition=Q(capacity__gte=1), name="slot_capacity_positive"),
+            models.CheckConstraint(
+                condition=Q(ends_at__gt=models.F("starts_at")), name="slot_ends_after_start"
+            ),
+        ]
+        verbose_name = _("appointment slot")
+        verbose_name_plural = _("appointment slots")
+
+    def __str__(self) -> str:
+        start = timezone.localtime(self.starts_at)
+        return f"{self.service.prefix} {start:%Y-%m-%d %H:%M}"
+
+    @property
+    def seats_left(self) -> int:
+        return max(self.capacity - self.booked_count, 0)
+
+
+phone_validator = RegexValidator(
+    r"^\+?[0-9]{9,15}$", _("Enter a phone number with 9 to 15 digits, e.g. 01X-XXX XXXX.")
+)
+
+
+class Booking(models.Model):
+    """A customer's appointment in a slot. Managed through a secret link (``token``)."""
+
+    class Status(models.TextChoices):
+        BOOKED = "booked", _("Booked")
+        CHECKED_IN = "checked_in", _("Checked in")
+        CANCELLED = "cancelled", _("Cancelled")
+        NO_SHOW = "no_show", _("No show")
+
+    slot = models.ForeignKey(
+        Slot, on_delete=models.PROTECT, related_name="bookings", verbose_name=_("slot")
+    )
+    ref = models.CharField(_("booking reference"), max_length=8, unique=True)
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    nickname = models.CharField(_("nickname"), max_length=40)
+    phone = models.CharField(_("phone"), max_length=16, validators=[phone_validator])
+    status = models.CharField(
+        _("status"), max_length=12, choices=Status.choices, default=Status.BOOKED
+    )
+    ticket = models.OneToOneField(
+        Ticket,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="booking",
+        verbose_name=_("ticket"),
+    )
+    created_at = models.DateTimeField(_("created"), default=timezone.now)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["slot__starts_at", "id"]
+        constraints = [
+            # One phone number cannot hold two seats in the same slot.
+            models.UniqueConstraint(
+                fields=["slot", "phone"],
+                condition=Q(status__in=["booked", "checked_in"]),
+                name="one_active_booking_per_phone_per_slot",
+            ),
+        ]
+        verbose_name = _("booking")
+        verbose_name_plural = _("bookings")
+
+    def __str__(self) -> str:
+        return self.ref
+
+    @property
+    def phone_masked(self) -> str:
+        """Only the last 4 digits, for screens other people can see."""
+        return "•••• " + self.phone[-4:]

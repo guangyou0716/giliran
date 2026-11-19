@@ -2,7 +2,10 @@
 {% block title %}{% translate "Services & counters" %}{% endblock %}
 {% block content %}
 <p class="eyebrow"><a href="{% url 'staff:dashboard' %}">{{ branch.name }}</a></p>
-<h1>{% translate "Services & counters" %}</h1>
+<div class="card-head">
+  <h1>{% translate "Services & counters" %}</h1>
+  <a class="btn" href="{% url 'manage:slots' branch.slug %}">{% translate "Appointment slots" %}</a>
+</div>
 <section class="card">
   <div class="card-head"><h2>{% translate "Services" %}</h2><a class="btn btn-primary" href="{% url 'manage:service_create' branch.slug %}">{% translate "New service" %}</a></div>
   <div class="table-wrap"><table class="table">

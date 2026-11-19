@@ -8,7 +8,7 @@
     <h2>{% translate "Current ticket" %}</h2>
     {% if current %}
       <p class="ticket-code" data-testid="current-code">{{ current.code }}</p>
-      <p><span class="pill">{{ current.get_status_display }}</span>{% if current.priority %} <span class="pill pill-priority">{% translate "Priority" %}</span>{% endif %}
+      <p><span class="pill">{{ current.get_status_display }}</span>{% if current.priority %} <span class="pill pill-priority">{% translate "Priority" %}</span>{% endif %}{% if current.source == "booking" %} <span class="pill pill-booked">{% translate "Appointment" %}</span>{% endif %}
         {% if current.nickname %}<span class="muted"> · {{ current.nickname }}</span>{% endif %}</p>
       <form method="post" action="{% url 'staff:counter_action' counter.pk %}" class="btn-row">{% csrf_token %}
         {% if current.status == 'called' %}
@@ -29,7 +29,7 @@
     <h2>{% translate "Waiting" %} <span class="count">{{ waiting|length }}</span></h2>
     <ol class="queue-list">
       {% for t in waiting %}
-        <li><strong>{{ t.code }}</strong> {% if t.priority %}<span class="pill pill-priority">{% translate "Priority" %}</span>{% endif %} <span class="muted">{{ t.nickname }}</span> <span class="muted small">{{ t.created_at|time:"H:i" }}</span></li>
+        <li><strong>{{ t.code }}</strong> {% if t.priority %}<span class="pill pill-priority">{% translate "Priority" %}</span>{% endif %}{% if t.source == "booking" %} <span class="pill pill-booked">{% if t.appointment_at %}{% blocktranslate with time=t.appointment_at|time:"H:i" %}Booked {{ time }}{% endblocktranslate %}{% else %}{% translate "Booked (late)" %}{% endif %}</span>{% endif %} <span class="muted">{{ t.nickname }}</span> <span class="muted small">{{ t.created_at|time:"H:i" }}</span></li>
       {% empty %}
         <li class="empty">{% translate "Nobody is waiting." %}</li>
       {% endfor %}

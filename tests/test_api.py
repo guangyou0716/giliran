@@ -29,6 +29,7 @@ def test_ticket_status_json(client, consult, room1, room2):
         "counter": None,
         "recall_count": 0,
         "called_at": None,
+        "appointment_at": None,
     }
     assert "Secret Name" not in r.content.decode()
 

@@ -1,0 +1,46 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Appointments" %}{% endblock %}
+{% block content %}
+<p class="eyebrow"><a href="{% url 'staff:dashboard' %}">{{ branch.name }}</a></p>
+<div class="card-head">
+  <h1>{% translate "Appointments" %}</h1>
+  {% if role == "manager" %}<a class="btn" href="{% url 'manage:slots' branch.slug %}?day={{ day|date:'Y-m-d' }}">{% translate "Appointment slots" %}</a>{% endif %}
+</div>
+<form method="get" class="filters" role="search">
+  <div><label for="{{ form.day.id_for_label }}">{{ form.day.label }}</label><input type="date" name="day" id="{{ form.day.id_for_label }}" value="{{ day|date:'Y-m-d' }}"></div>
+  <div><label for="{{ form.q.id_for_label }}">{{ form.q.label }}</label>{{ form.q }}</div>
+  <div class="filter-actions"><button type="submit" class="btn btn-primary">{% translate "Filter" %}</button> <a class="btn" href="{% url 'staff:appointments' branch.slug %}">{% translate "Reset" %}</a></div>
+</form>
+<p class="muted small">{% blocktranslate with grace=GRACE %}Bookings not checked in within {{ grace }} minutes of their time become no-shows. Staff can still check them in today; they then queue like walk-ins.{% endblocktranslate %}</p>
+{% if rows %}
+<section class="card">
+  <div class="table-wrap"><table class="table appointments-table">
+    <thead><tr><th scope="col">{% translate "Time" %}</th><th scope="col">{% translate "Service" %}</th><th scope="col">{% translate "Booked" %}</th><th scope="col">{% translate "Reference" %}</th><th scope="col">{% translate "Nickname" %}</th><th scope="col">{% translate "Phone" %}</th><th scope="col">{% translate "Status" %}</th><th scope="col"><span class="sr-only">{% translate "Actions" %}</span></th></tr></thead>
+    <tbody>
+    {% for slot in rows %}{% if slot.listed %}{% for b in slot.listed %}
+      <tr{% if not slot.is_active %} class="inactive"{% endif %}>
+        {% if forloop.first %}<th scope="rowgroup" rowspan="{{ slot.listed|length }}" class="slot-cell">{{ slot.starts_at|time:"H:i" }}–{{ slot.ends_at|time:"H:i" }}</th>
+        <td rowspan="{{ slot.listed|length }}">{{ slot.service.prefix }} · {{ slot.service.name }}</td>
+        <td rowspan="{{ slot.listed|length }}">{% blocktranslate with n=slot.booked_count total=slot.capacity %}{{ n }} / {{ total }} booked{% endblocktranslate %}</td>{% endif %}
+        <td><strong>{{ b.ref }}</strong></td><td>{{ b.nickname }}</td><td>{{ b.phone_masked }}</td>
+        <td><span class="pill status-{{ b.status }}">{{ b.get_status_display }}</span>{% if b.ticket %} → <strong>{{ b.ticket.code }}</strong>{% endif %}</td>
+        <td>{% if is_today and b.status == "booked" or is_today and b.status == "no_show" %}
+          <form method="post" action="{% url 'staff:booking_check_in' b.pk %}" class="inline">{% csrf_token %}
+            <button type="submit" class="btn btn-primary" aria-label="{% blocktranslate with ref=b.ref %}Check in {{ ref }}{% endblocktranslate %}">{% translate "Check in" %}</button>
+          </form>{% endif %}</td>
+      </tr>
+    {% endfor %}{% endif %}{% endfor %}
+    {% if not has_bookings %}<tr><td colspan="8" class="empty">{% translate "No bookings yet." %}</td></tr>{% endif %}
+    </tbody>
+  </table></div>
+  {% if free_slots %}
+  <h2 class="small-heading">{% translate "Slots without bookings" %}</h2>
+  <ul class="chips">
+    {% for slot in free_slots %}<li{% if not slot.is_active %} class="inactive"{% endif %}>{{ slot.starts_at|time:"H:i" }} · {{ slot.service.prefix }} <span class="muted">0 / {{ slot.capacity }}</span></li>{% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% else %}
+<p class="empty">{% if q %}{% translate "No bookings match." %}{% else %}{% translate "No appointment slots on this day." %}{% endif %}</p>
+{% endif %}
+{% endblock %}

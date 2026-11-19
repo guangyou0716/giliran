@@ -434,3 +434,303 @@ msgstr "Tiket %(code)s ditambah."
 
 msgid "Choose a service for the walk-in."
 msgstr "Pilih perkhidmatan untuk pelanggan walk-in."
+
+# Appointments (increment 2)
+
+#, python-format
+msgid "%(created)s slots created, %(skipped)s already existed."
+msgstr "%(created)s slot dicipta, %(skipped)s sudah wujud."
+
+#, python-format
+msgid "%(n)s / %(total)s booked"
+msgstr "%(n)s / %(total)s ditempah"
+
+#, python-format
+msgid "%(n)s left"
+msgstr "Tinggal %(n)s"
+
+#, python-format
+msgid "%(n)s seats are already booked; capacity cannot be lower."
+msgstr "%(n)s tempat sudah ditempah; kapasiti tidak boleh lebih rendah."
+
+#, python-format
+msgid "%(ref)s checked in: ticket %(code)s."
+msgstr "%(ref)s telah daftar masuk: tiket %(code)s."
+
+#, python-format
+msgid "About %(n)s min"
+msgstr "Kira-kira %(n)s minit"
+
+msgid "Actions"
+msgstr "Tindakan"
+
+msgid "Add slots"
+msgstr "Tambah slot"
+
+msgid "Appointment"
+msgstr "Temu janji"
+
+msgid "Appointment slots"
+msgstr "Slot temu janji"
+
+msgid "Appointments"
+msgstr "Temu janji"
+
+msgid "Book an appointment"
+msgstr "Tempah temu janji"
+
+msgid "Book this time"
+msgstr "Tempah masa ini"
+
+msgid "Booked"
+msgstr "Ditempah"
+
+#, python-format
+msgid "Booked %(time)s"
+msgstr "Tempahan %(time)s"
+
+msgid "Booked (late)"
+msgstr "Tempahan (lewat)"
+
+msgid "Booked. Keep this page: it is your booking link."
+msgstr "Berjaya ditempah. Simpan halaman ini: ia pautan tempahan anda."
+
+msgid "Bookings can only be checked in on the day of the appointment."
+msgstr "Tempahan hanya boleh didaftar masuk pada hari temu janji."
+
+#, python-format
+msgid "Bookings not checked in within %(grace)s minutes of their time become no-shows. Staff can still check them in today; they then queue like walk-ins."
+msgstr "Tempahan yang tidak didaftar masuk dalam %(grace)s minit selepas masanya menjadi tidak hadir. Kakitangan masih boleh mendaftar masuk mereka hari ini; mereka kemudian beratur seperti pelanggan tanpa temu janji."
+
+msgid "Bookmark this page: it is the only way to manage your booking."
+msgstr "Tanda halaman ini: ia satu-satunya cara untuk mengurus tempahan anda."
+
+msgid "Cancel my booking"
+msgstr "Batalkan tempahan saya"
+
+msgid "Check in"
+msgstr "Daftar masuk"
+
+#, python-format
+msgid "Check in %(ref)s"
+msgstr "Daftar masuk %(ref)s"
+
+#, python-format
+msgid "Check-in opens at %(time)s."
+msgstr "Daftar masuk dibuka pada %(time)s."
+
+msgid "Check-in time passed"
+msgstr "Masa daftar masuk telah tamat"
+
+msgid "Checked in"
+msgstr "Sudah daftar masuk"
+
+msgid "Choose a service and a day first."
+msgstr "Pilih perkhidmatan dan hari dahulu."
+
+msgid "Choose a time"
+msgstr "Pilih masa"
+
+msgid "Choose today or a later day."
+msgstr "Pilih hari ini atau hari kemudian."
+
+msgid "Could not create the booking. Please try again."
+msgstr "Tempahan tidak dapat dibuat. Sila cuba lagi."
+
+msgid "Create slots"
+msgstr "Cipta slot"
+
+msgid "Delete slot"
+msgstr "Padam slot"
+
+msgid "Edit slot"
+msgstr "Sunting slot"
+
+#, python-format
+msgid "Edit slot %(prefix)s %(time)s"
+msgstr "Sunting slot %(prefix)s %(time)s"
+
+msgid "Enter a phone number with 9 to 15 digits, e.g. 01X-XXX XXXX."
+msgstr "Masukkan nombor telefon dengan 9 hingga 15 digit, cth. 01X-XXX XXXX."
+
+msgid "From"
+msgstr "Dari"
+
+msgid "How many people can book this time."
+msgstr "Berapa orang boleh menempah masa ini."
+
+msgid "I have arrived: check in"
+msgstr "Saya sudah sampai: daftar masuk"
+
+msgid "Leave room for walk-ins: booked customers are called first at their time."
+msgstr "Beri ruang untuk pelanggan tanpa temu janji: pelanggan bertempah dipanggil dahulu pada masa mereka."
+
+msgid "Minutes per slot"
+msgstr "Minit setiap slot"
+
+msgid "No appointment slots on this day."
+msgstr "Tiada slot temu janji pada hari ini."
+
+msgid "No bookings match."
+msgstr "Tiada tempahan yang sepadan."
+
+msgid "No bookings yet."
+msgstr "Belum ada tempahan."
+
+msgid "No free times on this day. Try another day, or take a walk-in number."
+msgstr "Tiada masa kosong pada hari ini. Cuba hari lain, atau ambil nombor giliran."
+
+#, python-format
+msgid "Open my queue number %(code)s"
+msgstr "Buka nombor giliran saya %(code)s"
+
+msgid "Phone"
+msgstr "Telefon"
+
+msgid "Phone number"
+msgstr "Nombor telefon"
+
+msgid "Pick a time, then check in when you arrive. Booked customers are called first at their time."
+msgstr "Pilih masa, kemudian daftar masuk apabila anda tiba. Pelanggan bertempah dipanggil dahulu pada masa mereka."
+
+msgid "Prefer a fixed time?"
+msgstr "Mahu masa yang tetap?"
+
+msgid "Reference"
+msgstr "Rujukan"
+
+msgid "Reference, nickname or last 4 digits"
+msgstr "Rujukan, nama panggilan atau 4 digit terakhir"
+
+msgid "Seats per slot"
+msgstr "Tempat setiap slot"
+
+#, python-format
+msgid "Seats taken: %(n)s"
+msgstr "Tempat diambil: %(n)s"
+
+msgid "Show"
+msgstr "Papar"
+
+msgid "Show times"
+msgstr "Papar masa"
+
+msgid "Slot deleted."
+msgstr "Slot dipadam."
+
+#, python-format
+msgid "Slots on %(day)s"
+msgstr "Slot pada %(day)s"
+
+msgid "Slots with bookings cannot be deleted; untick “open for booking” instead."
+msgstr "Slot yang ada tempahan tidak boleh dipadam; nyahtanda “dibuka untuk tempahan”."
+
+msgid "So staff can greet you. Please do not enter your IC number."
+msgstr "Supaya kakitangan boleh menyapa anda. Jangan masukkan nombor IC anda."
+
+msgid "Sorry, this time was just fully booked. Please pick another."
+msgstr "Maaf, masa ini baru sahaja penuh. Sila pilih masa lain."
+
+msgid "That time is no longer available."
+msgstr "Masa itu tidak lagi tersedia."
+
+msgid "That would create too many slots at once."
+msgstr "Itu akan mencipta terlalu banyak slot sekali gus."
+
+msgid "The check-in time for this booking has passed. Please ask at the counter."
+msgstr "Masa daftar masuk untuk tempahan ini telah tamat. Sila bertanya di kaunter."
+
+msgid "The end time must be after the start time."
+msgstr "Masa tamat mestilah selepas masa mula."
+
+msgid "The time range is shorter than one slot."
+msgstr "Julat masa lebih pendek daripada satu slot."
+
+msgid "This booking can no longer be cancelled."
+msgstr "Tempahan ini tidak lagi boleh dibatalkan."
+
+msgid "This booking cannot be checked in."
+msgstr "Tempahan ini tidak boleh didaftar masuk."
+
+msgid "This phone number already has a booking at this time."
+msgstr "Nombor telefon ini sudah ada tempahan pada masa ini."
+
+msgid "This slot has bookings. Close it for booking instead of deleting it."
+msgstr "Slot ini ada tempahan. Tutup tempahan untuknya dan bukan memadamnya."
+
+msgid "This time has already passed."
+msgstr "Masa ini sudah berlalu."
+
+msgid "This time is not open for booking."
+msgstr "Masa ini tidak dibuka untuk tempahan."
+
+msgid "Today"
+msgstr "Hari ini"
+
+msgid "Time"
+msgstr "Masa"
+
+msgid "Until"
+msgstr "Hingga"
+
+msgid "Used only for this booking. Staff screens show the last 4 digits."
+msgstr "Digunakan untuk tempahan ini sahaja. Skrin kakitangan hanya memaparkan 4 digit terakhir."
+
+msgid "You are checked in. This is your queue number."
+msgstr "Anda sudah daftar masuk. Ini nombor giliran anda."
+
+#, python-format
+msgid "You can check in here from %(time)s, or show the reference at the counter."
+msgstr "Anda boleh daftar masuk di sini mulai %(time)s, atau tunjukkan rujukan di kaunter."
+
+msgid "Your booking"
+msgstr "Tempahan anda"
+
+msgid "Your booking was cancelled."
+msgstr "Tempahan anda telah dibatalkan."
+
+msgid "appointment slot"
+msgstr "slot temu janji"
+
+msgid "appointment slots"
+msgstr "slot temu janji"
+
+msgid "appointment time"
+msgstr "masa temu janji"
+
+msgid "booked"
+msgstr "ditempah"
+
+msgid "booking"
+msgstr "tempahan"
+
+msgid "booking reference"
+msgstr "rujukan tempahan"
+
+msgid "bookings"
+msgstr "tempahan"
+
+msgid "capacity"
+msgstr "kapasiti"
+
+msgid "ends at"
+msgstr "tamat pada"
+
+msgid "open for booking"
+msgstr "dibuka untuk tempahan"
+
+msgid "phone"
+msgstr "telefon"
+
+msgid "slot"
+msgstr "slot"
+
+msgid "starts at"
+msgstr "mula pada"
+
+msgid "Slots without bookings"
+msgstr "Slot tanpa tempahan"
+
+#. Django date format for a short day label, e.g. "Fri 20 Nov".
+msgid "D j M"
+msgstr "D, j M"

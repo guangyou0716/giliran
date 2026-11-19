@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from .views import api, manage, public, staff
+from .views import api, appointments, manage, public, staff
 
 staff_patterns = (
     [
@@ -9,6 +9,8 @@ staff_patterns = (
         path("counters/<int:pk>/action/", staff.counter_action, name="counter_action"),
         path("b/<slug:slug>/walk-in/", staff.walk_in, name="walk_in"),
         path("b/<slug:slug>/tickets/", staff.ticket_history, name="history"),
+        path("b/<slug:slug>/appointments/", appointments.appointments, name="appointments"),
+        path("bookings/<int:pk>/check-in/", appointments.staff_check_in, name="booking_check_in"),
     ],
     "staff",
 )
@@ -20,6 +22,10 @@ manage_patterns = (
         path("b/<slug:slug>/services/<int:pk>/", manage.service_edit, name="service_edit"),
         path("b/<slug:slug>/counters/new/", manage.counter_create, name="counter_create"),
         path("b/<slug:slug>/counters/<int:pk>/", manage.counter_edit, name="counter_edit"),
+        path("b/<slug:slug>/slots/", appointments.slots, name="slots"),
+        path("b/<slug:slug>/slots/new/", appointments.slot_generate, name="slot_generate"),
+        path("b/<slug:slug>/slots/<int:pk>/", appointments.slot_edit, name="slot_edit"),
+        path("b/<slug:slug>/slots/<int:pk>/delete/", appointments.slot_delete, name="slot_delete"),
     ],
     "manage",
 )
@@ -38,6 +44,10 @@ urlpatterns = [
     path("b/<slug:slug>/board/", public.board, name="board"),
     path("t/<uuid:token>/", public.ticket, name="ticket"),
     path("t/<uuid:token>/cancel/", public.ticket_cancel, name="ticket_cancel"),
+    path("b/<slug:slug>/book/", appointments.book, name="book"),
+    path("a/<uuid:token>/", appointments.booking, name="booking"),
+    path("a/<uuid:token>/cancel/", appointments.booking_cancel, name="booking_cancel"),
+    path("a/<uuid:token>/check-in/", appointments.booking_check_in, name="booking_check_in"),
     path("staff/", include(staff_patterns)),
     path("manage/", include(manage_patterns)),
     path("api/", include(api_patterns)),
